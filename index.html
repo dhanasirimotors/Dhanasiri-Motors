@@ -35,13 +35,15 @@
     --sidebar-w: 220px;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+  html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
   body{
     background:var(--bg);
     color:var(--ink);
     font-family:var(--font-body);
     -webkit-font-smoothing:antialiased;
   }
+  #app{max-width:100vw;overflow-x:hidden;}
+  img,svg{max-width:100%;}
   h1,h2,h3,.display{
     font-family:var(--font-display);
     font-weight:800;
@@ -101,23 +103,25 @@
   .sidebar-footer strong{color:#C9C6BE;}
 
   /* ---------- MAIN ---------- */
-  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .main{flex:1;min-width:0;max-width:100%;display:flex;flex-direction:column;}
   .topbar{
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
     padding:18px 28px;background:var(--bg);position:sticky;top:0;z-index:5;
     border-bottom:1px solid var(--border);
   }
   .topbar h1{font-size:22px;}
   .topbar-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-weight:500;}
-  #clock{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);}
-  .page{display:none;padding:24px 28px 100px;}
+  #clock{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);white-space:nowrap;flex:0 0 auto;}
+  .page{display:none;padding:24px 28px 100px;max-width:100%;}
   .page.active{display:block;}
 
   /* ---------- CARDS / GRID ---------- */
-  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+  /* auto-fit so this responds to screen width on its own — never rely on
+     inline grid-template-columns, which would override every media query below */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px;}
   .stat-card{
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    padding:16px 18px;box-shadow:var(--shadow-sm);
+    padding:16px 18px;box-shadow:var(--shadow-sm);min-width:0;
   }
   .stat-card .label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700;}
   .stat-card .value{font-family:var(--font-display);font-size:26px;font-weight:800;margin-top:6px;}
@@ -129,12 +133,14 @@
     box-shadow:var(--shadow-sm);margin-bottom:18px;
   }
   .panel-head{
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
     padding:14px 18px;border-bottom:1px solid var(--border);
   }
-  .panel-head h3{font-size:14px;}
-  .panel-body{padding:6px 18px 16px;}
-  .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;}
+  .panel-head h3{font-size:14px;min-width:0;}
+  .panel-body{padding:6px 18px 16px;min-width:0;}
+  #billItemList{max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--border);margin-top:2px;}
+  .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;max-width:100%;}
+  .panel{min-width:0;}
 
   /* ---------- TABLE ---------- */
   table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -180,12 +186,15 @@
     background:var(--surface);font-size:14px;color:var(--ink);
   }
   input:focus,select:focus,textarea:focus{outline:2px solid var(--amber);outline-offset:0;border-color:var(--amber);}
+  input[type=file]{width:100%;max-width:100%;}
+  input[type=date]{width:auto;min-width:0;max-width:100%;flex:0 1 150px;}
   .field{margin-bottom:13px;}
   .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .hint{font-size:11.5px;color:var(--ink-faint);margin-top:4px;}
-  .search-box{position:relative;}
+  .search-box{position:relative;min-width:0;}
   .search-box input{padding-left:32px;}
   .search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--ink-faint);}
+  .search-box-fixed{width:280px;max-width:100%;}
 
   /* ---------- EMPTY STATE ---------- */
   .empty{text-align:center;padding:46px 20px;color:var(--ink-soft);}
@@ -215,20 +224,21 @@
   /* ---------- BILLING ---------- */
   .item-pick{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:10px 8px;border-bottom:1px solid var(--border);
+    padding:10px 8px;border-bottom:1px solid var(--border);flex-wrap:wrap;
   }
   .item-pick:last-child{border-bottom:none;}
-  .item-pick .name{font-weight:700;font-size:13.5px;}
+  .item-pick .name{font-weight:700;font-size:13.5px;min-width:0;overflow-wrap:anywhere;flex:1 1 140px;}
   .item-pick .meta{font-size:11.5px;color:var(--ink-soft);font-family:var(--font-mono);}
-  .cart-line{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);}
+  .cart-line{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
   .cart-line:last-child{border-bottom:none;}
-  .cart-line .name{flex:1;font-size:13px;font-weight:600;}
+  .cart-line .name{flex:1 1 120px;font-size:13px;font-weight:600;min-width:0;overflow-wrap:anywhere;}
   .qty-stepper{display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:6px;overflow:hidden;}
   .qty-stepper button{background:var(--surface-alt);border:none;width:24px;height:24px;cursor:pointer;font-weight:800;color:var(--ink);}
   .qty-stepper span{width:28px;text-align:center;font-family:var(--font-mono);font-size:12.5px;}
   .totals-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;}
   .totals-row.grand{font-size:18px;font-weight:800;font-family:var(--font-display);border-top:2px solid var(--ink);margin-top:6px;padding-top:10px;}
-  .cust-select-wrap{display:flex;gap:8px;}
+  .cust-select-wrap{display:flex;gap:8px;flex-wrap:wrap;}
+  .cust-select-wrap select{min-width:0;}
 
   /* ---------- RECEIPT ---------- */
   #receiptPrintArea{font-family:var(--font-mono);font-size:12.5px;color:#111;padding:6px 2px;}
@@ -274,7 +284,6 @@
 
   /* ---------- MOBILE ---------- */
   @media (max-width: 860px){
-    .stat-grid{grid-template-columns:1fr 1fr;}
     .two-col{grid-template-columns:1fr;}
   }
   /* keep any table's horizontal scroll contained to its own panel, not the whole page */
@@ -288,15 +297,25 @@
       padding-bottom:env(safe-area-inset-bottom);
     }
     .brand,.sidebar-footer{display:none;}
-    .nav{flex-direction:row;justify-content:space-around;padding:6px 4px;width:100%;}
-    .nav-item{flex-direction:column;gap:3px;font-size:9.5px;padding:6px 4px;border-radius:8px;}
+    .nav{flex-direction:row;justify-content:space-around;padding:6px 2px;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .nav-item{flex:1 1 0;min-width:0;flex-direction:column;gap:3px;font-size:9px;padding:6px 2px;border-radius:8px;}
+    .nav-item span:not(.badge-dot){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+    .nav-item svg{width:17px;height:17px;flex:0 0 17px;}
     .nav-item .badge-dot{position:absolute;margin-left:14px;margin-top:-14px;}
-    .main{padding-bottom:70px;}
+    .main{padding-bottom:74px;max-width:100%;}
     .page{padding:16px 14px 90px;}
-    .topbar{padding:14px 16px;}
+    .topbar{padding:14px 16px;flex-wrap:wrap;}
+    .topbar h1{font-size:19px;}
     .stat-grid{grid-template-columns:1fr 1fr;gap:10px;}
+    .stat-card{padding:12px 14px;}
+    .stat-card .value{font-size:20px;}
     .field-row{grid-template-columns:1fr;}
     .modal{max-height:92vh;}
+    .modal-foot{flex-direction:column-reverse;}
+    .modal-foot .btn{width:100%;}
+    .search-box-fixed{width:100%;}
+    .panel-head{padding:12px 14px;}
+    .panel-body{padding:6px 14px 14px;}
     .panel-body table{min-width:560px;font-size:12px;}
     .panel-body th:first-child,.panel-body td:first-child{
       position:sticky;left:0;background:var(--surface);z-index:1;
@@ -306,6 +325,15 @@
     .panel-body td{padding:8px 6px;}
     .row-actions{flex-direction:column;gap:4px;}
     .row-actions .btn{width:100%;}
+    #billItemList{max-height:36vh;}
+  }
+  /* small phones (iPhone SE, older Android ~360-390px) */
+  @media (max-width: 400px){
+    .stat-grid{grid-template-columns:1fr;}
+    .nav-item span:not(.badge-dot){font-size:8.5px;}
+    .nav-item{padding:6px 1px;}
+    .topbar h1{font-size:17px;}
+    #clock{font-size:10.5px;}
   }
   @media print{
     body *{visibility:hidden;}
@@ -385,12 +413,15 @@
         <h1 id="pageTitle">Dashboard</h1>
         <div class="topbar-sub" id="pageSub">Today's overview at a glance</div>
       </div>
-      <div id="clock"></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div id="clock"></div>
+        <button class="btn btn-outline btn-sm install-btn" id="installBtnTop" onclick="installApp()" style="display:none;">⬇ Install App</button>
+      </div>
     </header>
 
     <!-- DASHBOARD -->
     <section class="page active" id="page-dashboard">
-      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-grid">
         <div class="stat-card"><div class="label">Stock Value (Retail)</div><div class="value" id="statStockValue">Rs. 0</div></div>
         <div class="stat-card"><div class="label">Low / Out of Stock</div><div class="value red" id="statLowStock">0</div></div>
         <div class="stat-card"><div class="label">Today's Sales</div><div class="value amber" id="statTodaySales">Rs. 0</div></div>
@@ -431,7 +462,7 @@
         <div class="panel">
           <div class="panel-head">
             <h3>Current Sale</h3>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button class="btn btn-outline btn-sm" id="parkedBtn" onclick="openParkedModal()" style="display:none;">Parked (<span id="parkedCount">0</span>)</button>
               <button class="btn btn-outline btn-sm" onclick="holdSale()">Hold</button>
               <button class="btn btn-outline btn-sm" onclick="clearCart()">Clear</button>
@@ -490,7 +521,7 @@
     <section class="page" id="page-stock">
       <div class="panel">
         <div class="panel-head">
-          <div class="search-box" style="width:280px;">
+          <div class="search-box search-box-fixed">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="stockSearch" placeholder="Search stock...">
           </div>
@@ -521,7 +552,7 @@
     <section class="page" id="page-customers">
       <div class="panel">
         <div class="panel-head">
-          <div class="search-box" style="width:280px;">
+          <div class="search-box search-box-fixed">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="custSearch" placeholder="Search customers...">
           </div>
@@ -533,7 +564,7 @@
 
     <!-- REPORTS -->
     <section class="page" id="page-reports">
-      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-grid">
         <div class="stat-card"><div class="label">Revenue (filtered)</div><div class="value amber" id="repRevenue">Rs. 0</div></div>
         <div class="stat-card"><div class="label">Sales Count</div><div class="value" id="repCount">0</div></div>
         <div class="stat-card"><div class="label">Average Sale</div><div class="value green" id="repAvg">Rs. 0</div></div>
@@ -542,7 +573,7 @@
       <div class="panel">
         <div class="panel-head">
           <h3>Sales History</h3>
-          <div style="display:flex;gap:8px;align-items:center;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <input type="date" id="repFrom">
             <span style="color:var(--ink-soft);font-size:12px;">to</span>
             <input type="date" id="repTo">
@@ -555,7 +586,7 @@
 
     <!-- EXPENSES -->
     <section class="page" id="page-expenses">
-      <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+      <div class="stat-grid">
         <div class="stat-card"><div class="label">Expenses (filtered)</div><div class="value red" id="expTotal">Rs. 0</div></div>
         <div class="stat-card"><div class="label">Revenue (filtered)</div><div class="value amber" id="expRevenue">Rs. 0</div></div>
         <div class="stat-card"><div class="label">Net Profit (filtered)</div><div class="value green" id="expNetProfit">Rs. 0</div></div>
@@ -563,7 +594,7 @@
       <div class="panel">
         <div class="panel-head">
           <h3>Shop Expenses</h3>
-          <div style="display:flex;gap:8px;align-items:center;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <input type="date" id="expFrom">
             <span style="color:var(--ink-soft);font-size:12px;">to</span>
             <input type="date" id="expTo">
@@ -577,6 +608,13 @@
 
     <!-- SETTINGS -->
     <section class="page" id="page-settings">
+      <div class="panel" id="installPanel">
+        <div class="panel-head"><h3>Install App</h3></div>
+        <div class="panel-body">
+          <p class="hint" style="margin-bottom:14px;">Install Dhanasiri Motors POS on this device like a normal app — it'll get its own icon, open full-screen, and keep working offline.</p>
+          <button class="btn btn-primary" style="width:100%;" onclick="installApp()">📲 Install App on This Device</button>
+        </div>
+      </div>
       <div class="two-col">
         <div class="panel">
           <div class="panel-head"><h3>Shop Details</h3></div>
@@ -2544,6 +2582,82 @@ function clearAllData(){
 }
 
 /* =========================================================
+   PWA INSTALL
+   ========================================================= */
+let deferredInstallPrompt = null;
+
+function isStandaloneMode(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function isIOSDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function refreshInstallUI(){
+  const panel = document.getElementById('installPanel');
+  const topBtn = document.getElementById('installBtnTop');
+  if(isStandaloneMode()){
+    if(panel) panel.style.display = 'none';
+    if(topBtn) topBtn.style.display = 'none';
+    return;
+  }
+  if(panel) panel.style.display = '';
+  if(topBtn) topBtn.style.display = deferredInstallPrompt ? 'inline-flex' : 'none';
+}
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  refreshInstallUI();
+});
+
+window.addEventListener('appinstalled', function(){
+  deferredInstallPrompt = null;
+  refreshInstallUI();
+  toast('App installed — find it on your home screen');
+});
+
+async function installApp(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    const choice = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    refreshInstallUI();
+    if(choice && choice.outcome === 'accepted') toast('Installing app…');
+    return;
+  }
+  if(isIOSDevice()){
+    openModal(`
+      <div class="modal-head"><h3>Install on iPhone / iPad</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+      <div class="modal-body">
+        <p class="hint" style="font-size:13.5px;color:var(--ink);margin-bottom:10px;">Safari doesn't allow one-tap install, but adding it takes a few seconds:</p>
+        <ol style="padding-left:18px;font-size:13.5px;line-height:1.9;color:var(--ink);">
+          <li>Open this page in <strong>Safari</strong> (not Chrome)</li>
+          <li>Tap the <strong>Share</strong> icon (square with an arrow) in the toolbar</li>
+          <li>Scroll down and tap <strong>Add to Home Screen</strong></li>
+          <li>Tap <strong>Add</strong> — the app icon will appear on your home screen</li>
+        </ol>
+      </div>
+      <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal()">Got it</button></div>
+    `);
+    return;
+  }
+  openModal(`
+    <div class="modal-head"><h3>Install this App</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="hint" style="font-size:13.5px;color:var(--ink);margin-bottom:10px;">Your browser hasn't offered an install prompt yet. In most browsers (Chrome, Edge, Brave, Samsung Internet):</p>
+      <ol style="padding-left:18px;font-size:13.5px;line-height:1.9;color:var(--ink);">
+        <li>Tap the browser's <strong>menu</strong> (⋮ or ≡)</li>
+        <li>Choose <strong>Install App</strong> or <strong>Add to Home Screen</strong></li>
+      </ol>
+      <p class="hint" style="margin-top:10px;">If it's already installed, you're all set — open it from your home screen or app drawer instead of the browser.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal()">Got it</button></div>
+  `);
+}
+
+/* =========================================================
    CLOCK + INIT
    ========================================================= */
 function tickClock(){
@@ -2557,6 +2671,7 @@ setInterval(tickClock, 1000); tickClock();
   renderDashboard();
   updateReorderBadge();
   renderParkedButton();
+  refreshInstallUI();
   if(pageTitles[start]) switchPage(start); else switchPage('dashboard');
   cloudInit();
 })();
