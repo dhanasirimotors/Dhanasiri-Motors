@@ -277,6 +277,9 @@
     .stat-grid{grid-template-columns:1fr 1fr;}
     .two-col{grid-template-columns:1fr;}
   }
+  /* keep any table's horizontal scroll contained to its own panel, not the whole page */
+  .panel-body{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .panel-body table{min-width:640px;}
   @media (max-width: 720px){
     #app{flex-direction:column;}
     .sidebar{
@@ -294,6 +297,15 @@
     .stat-grid{grid-template-columns:1fr 1fr;gap:10px;}
     .field-row{grid-template-columns:1fr;}
     .modal{max-height:92vh;}
+    .panel-body table{min-width:560px;font-size:12px;}
+    .panel-body th:first-child,.panel-body td:first-child{
+      position:sticky;left:0;background:var(--surface);z-index:1;
+      box-shadow:2px 0 4px rgba(34,38,43,.06);
+    }
+    .panel-body th{padding:8px 6px;}
+    .panel-body td{padding:8px 6px;}
+    .row-actions{flex-direction:column;gap:4px;}
+    .row-actions .btn{width:100%;}
   }
   @media print{
     body *{visibility:hidden;}
