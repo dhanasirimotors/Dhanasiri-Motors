@@ -299,6 +299,9 @@
     #printRoot{display:block !important;}
   }
 </style>
+<!-- Firebase (compat SDK — works with plain <script> tags, no build step) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -987,7 +990,97 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
    ========================================================= */
 const K = { items:'dm_items', customers:'dm_customers', sales:'dm_sales', settings:'dm_settings', reminders:'dm_reminders', parked:'dm_parked_sales', expenses:'dm_expenses' };
 function load(key, def){ try{ const v = JSON.parse(localStorage.getItem(key)); return v===null?def:v; }catch(e){ return def; } }
-function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){ toast('Storage error — is the browser in private mode?'); } }
+function save(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){ toast('Storage error — is the browser in private mode?'); } cloudSave(key, val); }
+
+/* =========================================================
+   CLOUD SYNC (Firebase Firestore)
+   Keeps every device on the same shop data. localStorage still
+   works as an instant, offline-first cache — Firestore layers
+   real-time sync on top of it.
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCGYDDIUxR2P4T7T468SvAVaVGSVRfj5Ys",
+  authDomain: "dhanasiri-motors.firebaseapp.com",
+  projectId: "dhanasiri-motors",
+  storageBucket: "dhanasiri-motors.firebasestorage.app",
+  messagingSenderId: "58966094343",
+  appId: "1:58966094343:web:13b5da3d1cb86226ec30a2",
+  measurementId: "G-C0JJD5BEMH"
+};
+let cloudDb = null;
+let cloudDocRef = null;
+let cloudReady = false;     // true once we've done the first read/merge
+let cloudApplyingRemote = false; // guards against remote→local→remote write loops
+const cloudKeyToField = {}; // 'dm_items' -> 'items', etc.
+Object.keys(K).forEach(field => { cloudKeyToField[K[field]] = field; });
+const cloudPendingFields = {};
+let cloudFlushTimer = null;
+
+function cloudFlush(){
+  if(!cloudDocRef || Object.keys(cloudPendingFields).length===0) return;
+  const payload = cloudPendingFields_snapshot();
+  cloudDocRef.set(payload, { merge:true }).catch(e=>console.warn('Cloud sync failed', e));
+}
+function cloudPendingFields_snapshot(){
+  const out = {};
+  Object.keys(cloudPendingFields).forEach(f=>{ out[f]=cloudPendingFields[f]; });
+  for(const k in cloudPendingFields) delete cloudPendingFields[k];
+  return out;
+}
+function cloudSave(key, val){
+  if(cloudApplyingRemote) return; // this write came FROM the cloud, don't echo it back
+  const field = cloudKeyToField[key];
+  if(!field || !cloudDocRef) return;
+  cloudPendingFields[field] = val;
+  clearTimeout(cloudFlushTimer);
+  cloudFlushTimer = setTimeout(cloudFlush, 400); // small debounce so rapid edits batch into one write
+}
+function cloudApplyRemoteData(data){
+  cloudApplyingRemote = true;
+  try{
+    if(data.items!==undefined){ items = data.items; save(K.items, items); }
+    if(data.customers!==undefined){ customers = data.customers; save(K.customers, customers); }
+    if(data.sales!==undefined){ sales = data.sales; save(K.sales, sales); }
+    if(data.settings!==undefined){ settings = data.settings; save(K.settings, settings); }
+    if(data.reminders!==undefined){ reminders = data.reminders; save(K.reminders, reminders); }
+    if(data.parkedSales!==undefined){ parkedSales = data.parkedSales; save(K.parked, parkedSales); }
+    if(data.expenses!==undefined){ expenses = data.expenses; save(K.expenses, expenses); }
+  } finally {
+    cloudApplyingRemote = false;
+  }
+  cloudRefreshCurrentView();
+}
+function cloudRefreshCurrentView(){
+  if(typeof pageTitles==='undefined') return;
+  const cur = (location.hash||'#dashboard').replace('#','');
+  if(pageTitles[cur]) switchPage(cur);
+  if(typeof updateReorderBadge==='function') updateReorderBadge();
+  if(typeof renderParkedButton==='function') renderParkedButton();
+}
+function cloudInit(){
+  try{
+    const app = firebase.initializeApp(firebaseConfig);
+    cloudDb = firebase.firestore();
+    cloudDb.enablePersistence({ synchronizeTabs:true }).catch(()=>{ /* multiple tabs / unsupported browser — fine, still works without offline cache */ });
+    cloudDocRef = cloudDb.collection('shops').doc('dhanasiri-motors-pos');
+    cloudDocRef.get().then(snap=>{
+      if(snap.exists){
+        cloudApplyRemoteData(snap.data());
+      } else {
+        // First run ever — seed the cloud doc with whatever is already on this device
+        cloudDocRef.set({ items, customers, sales, settings, reminders, parkedSales, expenses }, { merge:true });
+      }
+      cloudReady = true;
+    }).catch(e=>console.warn('Cloud initial load failed', e));
+    cloudDocRef.onSnapshot(snap=>{
+      if(!cloudReady) return; // skip the very first snapshot, already handled by the .get() above
+      if(snap.metadata.hasPendingWrites) return; // this is our own write echoing back — ignore
+      cloudApplyRemoteData(snap.data() || {});
+    }, e=>console.warn('Cloud listener error', e));
+  } catch(e){
+    console.warn('Firebase init failed — app will keep working from local storage only.', e);
+  }
+}
 
 let items = load(K.items, []);
 let customers = load(K.customers, []);
@@ -2449,6 +2542,7 @@ setInterval(tickClock, 1000); tickClock();
   updateReorderBadge();
   renderParkedButton();
   if(pageTitles[start]) switchPage(start); else switchPage('dashboard');
+  cloudInit();
 })();
 </script>
 </body>
