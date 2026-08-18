@@ -1,13 +1,25 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
+  "name": "Dhanasiri Motors — POS & Stock",
+  "short_name": "Dhanasiri POS",
+  "description": "Point of sale and stock management app for Dhanasiri Motors.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "name": "dhanasirimotors.github",
+  "background_color": "#EDEAE1",
+  "theme_color": "#22262B",
   "orientation": "any",
-  "scope": "/",
-  "short_name": "dhanasirimotors.github",
-  "start_url": "/",
-  "theme_color": "#ffffff",
-  "id": "Dhanasiri ",
-  "description": "spare parts and service"
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }

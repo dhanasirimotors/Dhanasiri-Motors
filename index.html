@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Dhanasiri Motors — POS &amp; Stock</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22262B">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root{
     --bg:#EDEAE1;
@@ -2544,6 +2548,12 @@ setInterval(tickClock, 1000); tickClock();
   if(pageTitles[start]) switchPage(start); else switchPage('dashboard');
   cloudInit();
 })();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
