@@ -235,6 +235,19 @@
   .qty-stepper{display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:6px;overflow:hidden;}
   .qty-stepper button{background:var(--surface-alt);border:none;width:24px;height:24px;cursor:pointer;font-weight:800;color:var(--ink);}
   .qty-stepper span{width:28px;text-align:center;font-family:var(--font-mono);font-size:12.5px;}
+  .qty-stepper input.ml-input{width:58px;height:24px;border:none;outline:none;text-align:center;font-family:var(--font-mono);font-size:12.5px;background:transparent;padding:0;border-radius:0;}
+  .qty-stepper .unit{width:auto;padding-right:6px;color:var(--ink-soft);}
+  .ml-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px;}
+  .ml-chip{border:1px solid var(--border-strong);background:var(--surface-alt);border-radius:999px;padding:5px 12px;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink);}
+  .ml-chip:hover{background:var(--border);}
+  #lockScreen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px;}
+  #lockScreen.show{display:flex;}
+  .lock-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-md);padding:26px 22px;width:100%;max-width:360px;}
+  .lock-card h2{margin:0 0 4px;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.03em;font-size:20px;}
+  .lock-card .sub{color:var(--ink-soft);font-size:13px;margin:0 0 18px;}
+  .sec-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border);}
+  .sec-row:first-child{border-top:none;padding-top:0;}
+  .sec-row .t{font-weight:700;font-size:13.5px;} .sec-row .d{color:var(--ink-soft);font-size:12.5px;margin-top:2px;}
   .totals-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;}
   .totals-row.grand{font-size:18px;font-weight:800;font-family:var(--font-display);border-top:2px solid var(--ink);margin-top:6px;padding-top:10px;}
   .cust-select-wrap{display:flex;gap:8px;flex-wrap:wrap;}
@@ -397,6 +410,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         <span>Expenses</span>
       </button>
+      <button class="nav-item" data-page="owner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Owner</span>
+      </button>
       <button class="nav-item" data-page="settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Settings</span>
@@ -422,14 +439,12 @@
     <!-- DASHBOARD -->
     <section class="page active" id="page-dashboard">
       <div class="stat-grid">
-        <div class="stat-card"><div class="label">Stock Value (Retail)</div><div class="value" id="statStockValue">Rs. 0</div></div>
+        <div class="stat-card" style="cursor:pointer;" onclick="switchPage('owner')"><div class="label">Profit &amp; Stock Value</div><div class="value" style="font-size:16px;">🔒 Owner section</div></div>
         <div class="stat-card"><div class="label">Low / Out of Stock</div><div class="value red" id="statLowStock">0</div></div>
         <div class="stat-card"><div class="label">Today's Sales</div><div class="value amber" id="statTodaySales">Rs. 0</div></div>
-        <div class="stat-card"><div class="label">Today's Profit</div><div class="value green" id="statTodayProfit">Rs. 0</div></div>
         <div class="stat-card"><div class="label">Outstanding Dues</div><div class="value red" id="statDues">Rs. 0</div></div>
         <div class="stat-card"><div class="label">Reorders Due</div><div class="value amber" id="statReorders">0</div></div>
         <div class="stat-card"><div class="label">Customers</div><div class="value green" id="statCustomers">0</div></div>
-        <div class="stat-card"><div class="label">This Month Net Profit</div><div class="value" id="statMonthNet">Rs. 0</div></div>
       </div>
       <div class="two-col">
         <div class="panel">
@@ -476,6 +491,10 @@
                 <button class="btn btn-outline btn-sm" onclick="openCustomerModal(null,true)">+ New</button>
               </div>
             </div>
+            <div id="prevDueBox" style="display:none;background:var(--red-bg);border:1px solid var(--red);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;">
+              <label style="display:flex;gap:8px;align-items:center;cursor:pointer;"><input type="checkbox" id="billIncludeDue"> <span>Previous due: <b id="prevDueAmt" class="mono"></b> — add to this bill</span></label>
+              <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="openReceivePayment(document.getElementById('billCustomer').value)">Receive payment only</button>
+            </div>
             <div id="cartLines"><div class="empty" style="padding:20px 0;">Cart is empty — add items from the left.</div></div>
             <div style="margin-top:8px;">
               <div class="field-row">
@@ -492,7 +511,7 @@
               </div>
               <div class="field-row">
                 <div class="field">
-                  <label>Service Charge (Rs.)</label>
+                  <label>Service Charge (Rs.) <span class="hint" style="display:inline;text-transform:none;font-weight:400;">· counted 100% as profit</span></label>
                   <input type="number" id="billServiceCharge" value="0" min="0" step="1">
                 </div>
                 <div class="field">
@@ -500,6 +519,7 @@
                   <input type="number" id="billTaxPct" value="0" min="0" step="0.5">
                 </div>
               </div>
+              <div class="field"><label>Service / repair description <span class="hint" style="display:inline;text-transform:none;font-weight:400;">· shown on the bill</span></label><input type="text" id="billServiceNote" maxlength="120" placeholder="e.g. Engine tune-up, clutch repair"></div>
               <div class="totals-row"><span>Subtotal</span><span id="tSubtotal" class="mono">Rs. 0.00</span></div>
               <div class="totals-row"><span>Discount</span><span id="tDiscount" class="mono">Rs. 0.00</span></div>
               <div class="totals-row" id="tServiceRow" style="display:none;"><span>Service Charge</span><span id="tService" class="mono">Rs. 0.00</span></div>
@@ -578,6 +598,7 @@
             <span style="color:var(--ink-soft);font-size:12px;">to</span>
             <input type="date" id="repTo">
             <button class="btn btn-outline btn-sm" onclick="setReportRange('all')">All time</button>
+            <button class="btn btn-outline btn-sm" onclick="openDeletedBills()">🗑 Deleted Bills</button>
           </div>
         </div>
         <div class="panel-body" style="padding-top:10px;" id="reportsTableWrap"></div>
@@ -607,6 +628,19 @@
     </section>
 
     <!-- SETTINGS -->
+    <!-- OWNER (locked section) -->
+    <section class="page" id="page-owner">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="label">Stock Value (Retail)</div><div class="value" id="statStockValue">••••••</div></div>
+        <div class="stat-card"><div class="label">Today's Profit</div><div class="value green" id="statTodayProfit">••••••</div></div>
+        <div class="stat-card"><div class="label">This Month Net Profit</div><div class="value" id="statMonthNet">••••••</div></div>
+      </div>
+      <div class="panel" style="margin-top:16px;">
+        <div class="panel-head"><h3>Lock &amp; Security</h3><button class="btn btn-outline btn-sm" onclick="lockNow()">🔒 Lock now</button></div>
+        <div class="panel-body" id="securityPanel"></div>
+      </div>
+    </section>
+
     <section class="page" id="page-settings">
       <div class="panel" id="installPanel">
         <div class="panel-head"><h3>Install App</h3></div>
@@ -653,6 +687,7 @@
 </div>
 
 <div id="modalRoot"></div>
+<div id="lockScreen"></div>
 <div id="toast"></div>
 <div id="printRoot" style="display:none;"><div id="receiptPrintArea"></div></div>
 
@@ -1152,7 +1187,22 @@ function persistAll(){
   save(K.reminders, reminders); save(K.parked, parkedSales); save(K.expenses, expenses);
 }
 function saleLineProfit(l){ return (l.price - (l.cost||0)) * (l.qty - (l.returnedQty||0)); }
-function saleProfit(s){ return (s.items||[]).reduce((sum,l)=>sum+saleLineProfit(l),0); }
+/* Profit = parts margin + service charge. Service charge is our own labour (we do the repairs
+   ourselves), so it has no cost and counts fully as profit. */
+function saleProfit(s){ return (s.items||[]).reduce((sum,l)=>sum+saleLineProfit(l),0) + (s.serviceChargeAmt||0); }
+
+/* Liquids (unit 'ltr', e.g. engine oil): stock + price are per LITRE, but the customer buys in ML.
+   Quantities are stored in litres (decimals allowed) and shown as ml / L. */
+function isLiquidUnit(u){ return u==='ltr'; }
+function round3(n){ return Math.round((Number(n)||0)*1000)/1000; }
+function fmtL(litres){
+  const ml = Math.round((Number(litres)||0)*1000);
+  if(ml>=1000) return (ml/1000).toFixed(3).replace(/\.?0+$/,'') + ' L';
+  return ml + ' ml';
+}
+function fmtQty(q, unit){ return isLiquidUnit(unit) ? fmtL(q) : String(q); }
+function lineQtyText(l){ return isLiquidUnit(l.unit) ? Math.round(l.qty*1000)+' ml' : String(l.qty); }
+function lineAmt(l){ return Math.round(l.price*l.qty*100)/100; }
 function saleReturnedAmt(s){ return (s.returns||[]).reduce((sum,r)=>sum+r.refundAmount,0); }
 function saleNetTotal(s){ return s.total - saleReturnedAmt(s); }
 function uid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
@@ -1174,9 +1224,19 @@ const pageTitles = {
   customers:['Customers',"Track customer details and history"],
   reports:['Reports',"Sales history and totals"],
   expenses:['Expenses',"Track shop running costs and see net profit"],
+  owner:['Owner',"Profit, stock value and security — password protected"],
   settings:['Settings',"Shop details and data backup"]
 };
 function switchPage(name){
+  /* owner-only pages need the password / fingerprint (if a lock is set) */
+  if(OWNER_PAGES.includes(name) && hasLock() && !ownerUnlocked){
+    const act = document.querySelector('.nav-item.active');
+    try{ history.replaceState(null,'','#'+((act&&act.dataset.page)||'dashboard')); }catch(e){}
+    requireOwner(()=>switchPage(name));
+    return;
+  }
+  /* shared-device mode: leaving the owner area locks it again */
+  if(!OWNER_PAGES.includes(name) && ownerUnlocked && hasLock() && !sec.lockApp){ ownerUnlocked = false; clearOwnerDOM(); }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
@@ -1190,6 +1250,7 @@ function switchPage(name){
   if(name==='reports') renderReports();
   if(name==='expenses') renderExpenses();
   if(name==='settings') fillSettingsForm();
+  if(name==='owner') renderOwner();
   location.hash = name;
 }
 document.getElementById('navList').addEventListener('click', e=>{
@@ -1226,16 +1287,16 @@ function renderDashboard(){
 
   const totalDue = sales.reduce((s,x)=>s+(x.amountDue||0),0);
 
-  document.getElementById('statStockValue').textContent = fmt(stockValue);
+  document.getElementById('statStockValue').textContent = sens(fmt(stockValue));
   document.getElementById('statLowStock').textContent = lowItems.length;
   document.getElementById('statTodaySales').textContent = fmt(todaySales);
-  document.getElementById('statTodayProfit').textContent = fmt(todayProfit);
+  document.getElementById('statTodayProfit').textContent = sens(fmt(todayProfit));
   document.getElementById('statCustomers').textContent = customers.length;
   document.getElementById('statDues').textContent = fmt(totalDue);
   document.getElementById('statReorders').textContent = reorderAlertCount();
   const monthNetEl = document.getElementById('statMonthNet');
-  monthNetEl.textContent = fmt(monthNetProfit);
-  monthNetEl.className = 'value ' + (monthNetProfit>=0?'green':'red');
+  monthNetEl.textContent = sens(fmt(monthNetProfit));
+  monthNetEl.className = 'value ' + (!isOwnerOpen() ? '' : (monthNetProfit>=0?'green':'red'));
 
   const dot = document.getElementById('lowStockDot');
   if(lowItems.length>0){ dot.style.display='flex'; dot.textContent = lowItems.length; } else dot.style.display='none';
@@ -1249,7 +1310,7 @@ function renderDashboard(){
     lowWrap.innerHTML = lowItems.slice(0,8).map(i=>`
       <div class="item-pick">
         <div><div class="name">${esc(i.name)}</div><div class="meta">${esc(i.partNumber||'—')}${i.supplier?' · '+esc(i.supplier):''}</div></div>
-        <span class="pill ${i.qty<=0?'out':'low'}">${i.qty<=0?'Out of stock':'Qty '+i.qty}</span>
+        <span class="pill ${i.qty<=0?'out':'low'}">${i.qty<=0?'Out of stock':'Qty '+fmtQty(i.qty,i.unit)}</span>
       </div>`).join('');
   }
 
@@ -1303,7 +1364,7 @@ function renderStock(){
         <td>
           <div class="qty-stepper">
             <button onclick="stepQty('${i.id}',-1)">−</button>
-            <span>${i.qty}</span>
+            <span style="width:auto;padding:0 6px;">${fmtQty(i.qty,i.unit)}</span>
             <button onclick="stepQty('${i.id}',1)">+</button>
           </div>
         </td>
@@ -1320,7 +1381,7 @@ document.getElementById('stockSearch').addEventListener('input', renderStock);
 
 function stepQty(id, delta){
   const it = items.find(i=>i.id===id); if(!it) return;
-  it.qty = Math.max(0, it.qty + delta);
+  it.qty = round3(Math.max(0, it.qty + delta));
   save(K.items, items); renderStock(); renderDashboard(); updateReorderBadge();
 }
 function deleteItem(id){
@@ -1347,8 +1408,8 @@ function openItemModal(id){
         <div class="field"><label>Sell Price *</label><input type="number" id="fSell" min="0" step="0.01" value="${editing?editing.sellPrice:0}"></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Quantity in Stock</label><input type="number" id="fQty" min="0" step="1" value="${editing?editing.qty:0}"></div>
-        <div class="field"><label>Low Stock Alert Below</label><input type="number" id="fMin" min="0" step="1" value="${editing?editing.minQty:2}"></div>
+        <div class="field"><label>Quantity in Stock <span class="hint" style="display:inline;text-transform:none;font-weight:400;">(litres for 'ltr' items, e.g. 18.25)</span></label><input type="number" id="fQty" min="0" step="any" value="${editing?editing.qty:0}"></div>
+        <div class="field"><label>Low Stock Alert Below</label><input type="number" id="fMin" min="0" step="any" value="${editing?editing.minQty:2}"></div>
       </div>
       <div class="field"><label>Unit</label>
         <select id="fUnit">
@@ -1378,8 +1439,8 @@ function saveItem(id){
     category: document.getElementById('fCat').value.trim(),
     costPrice: parseFloat(document.getElementById('fCost').value)||0,
     sellPrice: parseFloat(document.getElementById('fSell').value)||0,
-    qty: parseInt(document.getElementById('fQty').value)||0,
-    minQty: parseInt(document.getElementById('fMin').value)||0,
+    qty: (isLiquidUnit(document.getElementById('fUnit').value) ? round3(parseFloat(document.getElementById('fQty').value)) : parseInt(document.getElementById('fQty').value)) || 0,
+    minQty: (isLiquidUnit(document.getElementById('fUnit').value) ? round3(parseFloat(document.getElementById('fMin').value)) : parseInt(document.getElementById('fMin').value)) || 0,
     unit: document.getElementById('fUnit').value,
     supplier: document.getElementById('fSupplier').value.trim(),
     supplierPhone: document.getElementById('fSupplierPhone').value.trim(),
@@ -1419,7 +1480,7 @@ function renderReorders(){
       ${lowItems.map(i=>`
         <tr>
           <td><strong>${esc(i.name)}</strong><div class="meta mono" style="font-size:11px;color:var(--ink-soft);">${esc(i.partNumber||'—')}</div></td>
-          <td><span class="pill ${i.qty<=0?'out':'low'}">${i.qty<=0?'Out':'Qty '+i.qty}</span></td>
+          <td><span class="pill ${i.qty<=0?'out':'low'}">${i.qty<=0?'Out':'Qty '+fmtQty(i.qty,i.unit)}</span></td>
           <td class="mono">${i.reorderQty?i.reorderQty+' '+esc(i.unit||'pcs'):'—'}</td>
           <td>${i.supplier?esc(i.supplier)+(i.supplierPhone?' · '+esc(i.supplierPhone):''):'<span class="hint">Not set — edit item</span>'}</td>
           <td><div class="row-actions">
@@ -1542,6 +1603,7 @@ function renderCustomers(){
         <td class="mono">${esc(c.vehicleNo||'—')}</td>
         <td class="mono">${fmt(spent)}</td>
         <td><div class="row-actions">
+          ${custDue(c.id)>0?`<button class="btn btn-primary btn-sm" onclick="openReceivePayment('${c.id}')">Due ${fmt(custDue(c.id))} · Receive</button>`:''}
           <button class="btn btn-outline btn-sm" onclick="viewCustomerHistory('${c.id}')">History</button>
           <button class="btn btn-outline btn-sm" onclick="openCustomerModal('${c.id}')">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">Delete</button>
@@ -1646,8 +1708,8 @@ function renderBillItemList(){
   if(list.length===0){ wrap.innerHTML = `<div class="empty" style="padding:24px 0;"><p>No items match "${esc(q)}".</p></div>`; return; }
   wrap.innerHTML = list.map(i=>`
     <div class="item-pick">
-      <div><div class="name">${esc(i.name)}</div><div class="meta">${esc(i.partNumber||'—')} · ${fmt(i.sellPrice)} · Qty ${i.qty}</div></div>
-      <button class="btn btn-sm ${i.qty<=0?'btn-outline':'btn-dark'}" ${i.qty<=0?'disabled':''} onclick="addToCart('${i.id}')">Add</button>
+      <div><div class="name">${esc(i.name)}</div><div class="meta">${esc(i.partNumber||'—')} · ${fmt(i.sellPrice)}${isLiquidUnit(i.unit)?' / L':''} · Qty ${fmtQty(i.qty,i.unit)}</div></div>
+      <button class="btn btn-sm ${i.qty<=0?'btn-outline':'btn-dark'}" ${i.qty<=0?'disabled':''} onclick="addToCart('${i.id}')">${isLiquidUnit(i.unit)?'Add ml':'Add'}</button>
     </div>`).join('');
 }
 document.getElementById('billSearch').addEventListener('input', renderBillItemList);
@@ -1743,10 +1805,76 @@ function handleScannedCode(code){
 
 function addToCart(id){
   const it = items.find(i=>i.id===id); if(!it) return;
+  if(isLiquidUnit(it.unit)){ openMlModal(id); return; }
   const line = cart.find(l=>l.itemId===id);
   const inCart = line ? line.qty : 0;
   if(inCart >= it.qty){ toast('No more stock available'); return; }
   if(line) line.qty++; else cart.push({ itemId:id, name:it.name, price:it.sellPrice, cost:it.costPrice, qty:1 });
+  save('dm_cart_draft', cart); renderCart();
+}
+/* ---- Liquid (ml) items ---- */
+function mlChipLabel(ml){ return (ml>=1000 && ml%1000===0) ? (ml/1000)+' L' : ml+' ml'; }
+function openMlModal(id){
+  const it = items.find(i=>i.id===id); if(!it) return;
+  const inCartL = (cart.find(l=>l.itemId===id)||{qty:0}).qty;
+  const availL = round3(it.qty - inCartL);
+  if(availL<=0){ toast('No more stock available'); return; }
+  const availMl = Math.floor(availL*1000 + 1e-6);
+  const presets = [250,500,750,1000,1250,1500,1750,2000].filter(ml=>ml<=availMl);
+  openModal(`
+    <div class="modal-head"><h3>${esc(it.name)}</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;">${fmt(it.sellPrice)} per litre · ${fmtL(availL)} available${inCartL>0?' · '+Math.round(inCartL*1000)+' ml already in this bill':''}</p>
+      <div class="ml-chips">${presets.map(ml=>`<button type="button" class="ml-chip" onclick="setMlAmount(${ml})">${mlChipLabel(ml)}</button>`).join('')}</div>
+      <div class="field"><label>Amount (ml) — 1 L = 1000 ml</label>
+        <input type="number" id="mlAmount" min="1" max="${availMl}" step="1" inputmode="numeric" placeholder="e.g. 1750" data-id="${it.id}" data-price="${it.sellPrice}" data-avail="${availMl}">
+      </div>
+      <div class="totals-row grand" style="margin-top:10px;"><span>Price</span><span id="mlPrice" class="mono">${fmt(0)}</span></div>
+      <p class="hint" id="mlWarn" style="color:var(--red);display:none;margin-bottom:0;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addMlToCart('${it.id}')">Add to bill</button>
+    </div>
+  `);
+  const inp = document.getElementById('mlAmount');
+  inp.addEventListener('input', updateMlPrice);
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') addMlToCart(id); });
+  setTimeout(()=>inp.focus(), 0);
+}
+function setMlAmount(ml){ const inp = document.getElementById('mlAmount'); inp.value = ml; updateMlPrice(); }
+function updateMlPrice(){
+  const inp = document.getElementById('mlAmount'); if(!inp) return;
+  const ml = Math.max(0, Math.round(parseFloat(inp.value)||0));
+  const avail = parseInt(inp.dataset.avail)||0;
+  document.getElementById('mlPrice').textContent = fmt(Math.round(parseFloat(inp.dataset.price)*ml/1000*100)/100);
+  const warn = document.getElementById('mlWarn');
+  if(ml>avail){ warn.style.display='block'; warn.textContent = 'Only '+fmtL(avail/1000)+' available.'; }
+  else warn.style.display='none';
+}
+function addMlToCart(id){
+  const it = items.find(i=>i.id===id); if(!it) return;
+  const ml = Math.round(parseFloat(document.getElementById('mlAmount').value)||0);
+  if(ml<=0){ toast('Enter the amount in ml'); return; }
+  const line = cart.find(l=>l.itemId===id);
+  const next = round3((line?line.qty:0) + ml/1000);
+  if(next > it.qty + 1e-9){ toast('Not enough stock — only '+fmtL(it.qty - (line?line.qty:0))+' left'); return; }
+  if(line) line.qty = next;
+  else cart.push({ itemId:id, name:it.name, price:it.sellPrice, cost:it.costPrice, qty:round3(ml/1000), unit:'ltr' });
+  save('dm_cart_draft', cart); closeModal(); renderCart();
+  toast(`Added ${ml} ml — ${it.name}`);
+}
+function changeCartMl(id, deltaMl){
+  const line = cart.find(l=>l.itemId===id); if(!line) return;
+  setCartMl(id, Math.round(line.qty*1000) + deltaMl);
+}
+function setCartMl(id, mlVal){
+  const line = cart.find(l=>l.itemId===id); if(!line) return;
+  const it = items.find(i=>i.id===id);
+  const ml = Math.round(parseFloat(mlVal)||0);
+  if(ml<=0){ cart = cart.filter(l=>l.itemId!==id); }
+  else if(it && ml/1000 > it.qty + 1e-9){ toast('No more stock available — max '+fmtL(it.qty)); }
+  else line.qty = round3(ml/1000);
   save('dm_cart_draft', cart); renderCart();
 }
 function changeCartQty(id, delta){
@@ -1760,7 +1888,7 @@ function changeCartQty(id, delta){
 }
 function clearCart(){ cart=[]; save('dm_cart_draft', cart); document.getElementById('billDiscount').value=0; renderCart(); }
 function computeTotals(){
-  const subtotal = cart.reduce((s,l)=>s+l.price*l.qty,0);
+  const subtotal = Math.round(cart.reduce((s,l)=>s+lineAmt(l),0)*100)/100;
   const discount = Math.max(0, Math.min(subtotal, parseFloat(document.getElementById('billDiscount').value)||0));
   const afterDiscount = subtotal - discount;
   const serviceChargeAmt = Math.max(0, parseFloat(document.getElementById('billServiceCharge').value)||0);
@@ -1772,17 +1900,22 @@ function computeTotals(){
 function renderCart(){
   const wrap = document.getElementById('cartLines');
   if(cart.length===0){
-    wrap.innerHTML = `<div class="empty" style="padding:20px 0;">Cart is empty — add items from the left.</div>`;
+    wrap.innerHTML = `<div class="empty" style="padding:20px 0;">Cart is empty — add items from the left.<br><span style="font-size:12px;">Service / repair only? Just enter the Service Charge below.</span></div>`;
   } else {
     wrap.innerHTML = cart.map(l=>`
       <div class="cart-line">
-        <div class="name">${esc(l.name)}<div class="meta mono" style="font-weight:400;color:var(--ink-soft);font-size:11px;">${fmt(l.price)} each</div></div>
-        <div class="qty-stepper">
+        <div class="name">${esc(l.name)}<div class="meta mono" style="font-weight:400;color:var(--ink-soft);font-size:11px;">${fmt(l.price)} ${isLiquidUnit(l.unit)?'per litre':'each'}</div></div>
+        ${isLiquidUnit(l.unit) ? `<div class="qty-stepper">
+          <button onclick="changeCartMl('${l.itemId}',-250)">−</button>
+          <input type="number" class="ml-input" min="0" step="1" inputmode="numeric" value="${Math.round(l.qty*1000)}" onchange="setCartMl('${l.itemId}',this.value)">
+          <span class="unit">ml</span>
+          <button onclick="changeCartMl('${l.itemId}',250)">+</button>
+        </div>` : `<div class="qty-stepper">
           <button onclick="changeCartQty('${l.itemId}',-1)">−</button>
           <span>${l.qty}</span>
           <button onclick="changeCartQty('${l.itemId}',1)">+</button>
-        </div>
-        <span class="mono" style="width:78px;text-align:right;font-weight:700;">${fmt(l.price*l.qty)}</span>
+        </div>`}
+        <span class="mono" style="width:78px;text-align:right;font-weight:700;">${fmt(lineAmt(l))}</span>
       </div>`).join('');
   }
   const t = computeTotals();
@@ -1793,12 +1926,13 @@ function renderCart(){
   document.getElementById('tTaxRow').style.display = t.taxAmt>0 ? 'flex':'none';
   document.getElementById('tTax').textContent = fmt(t.taxAmt);
   document.getElementById('tTotal').textContent = fmt(t.total);
-  document.getElementById('completeSaleBtn').disabled = cart.length===0;
+  document.getElementById('completeSaleBtn').disabled = cart.length===0 && t.serviceChargeAmt<=0;
+  updatePrevDueBox();
 
   const paidInput = document.getElementById('billAmountPaid');
-  if(!paidInput.dataset.userEdited){ paidInput.value = t.total.toFixed(2); }
+  if(!paidInput.dataset.userEdited){ paidInput.value = (t.total + prevDueInc()).toFixed(2); }
   const paid = Math.max(0, parseFloat(paidInput.value)||0);
-  const due = Math.max(0, t.total - paid);
+  const due = Math.max(0, t.total + prevDueInc() - paid);
   document.getElementById('dueHint').textContent = due>0 ? `Due: ${fmt(due)}` : (t.total>0 ? 'Paid in full' : '');
 }
 ['billDiscount','billServiceCharge','billTaxPct'].forEach(id=>{
@@ -1811,8 +1945,8 @@ document.getElementById('billAmountPaid').addEventListener('input', function(){
   this.dataset.userEdited = '1';
   const t = computeTotals();
   const paid = Math.max(0, parseFloat(this.value)||0);
-  const due = Math.max(0, t.total - paid);
-  document.getElementById('dueHint').textContent = due>0 ? `Due: ${fmt(due)}` : (t.total>0 ? 'Paid in full' : '');
+  const due = Math.max(0, t.total + prevDueInc() - paid);
+  document.getElementById('dueHint').textContent = due>0 ? `Due: ${fmt(due)}` : (t.total+prevDueInc()>0 ? 'Paid in full' : '');
 });
 
 /* ---- Hold / Park sale ---- */
@@ -1846,7 +1980,7 @@ function openParkedModal(){
     <div class="modal-head"><h3>Parked Sales</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
     <div class="modal-body">
       ${parkedSales.map(p=>{
-        const subtotal = p.cart.reduce((s,l)=>s+l.price*l.qty,0);
+        const subtotal = p.cart.reduce((s,l)=>s+lineAmt(l),0);
         return `<div class="item-pick">
           <div><div class="name">${esc(p.customerName)}</div><div class="meta">${p.cart.length} item(s) · ${fmt(subtotal)} · ${fmtDate(p.createdAt)}</div></div>
           <div class="row-actions">
@@ -1883,28 +2017,38 @@ function deleteParkedSale(id){
 }
 
 function completeSale(){
-  if(cart.length===0) return;
+  if(cart.length===0 && computeTotals().serviceChargeAmt<=0){ toast('Add items, or enter a service charge'); return; }
   for(const l of cart){
     const it = items.find(i=>i.id===l.itemId);
-    if(!it || it.qty < l.qty){ toast(`Not enough stock for ${l.name}`); return; }
+    if(!it || it.qty + 1e-9 < l.qty){ toast(`Not enough stock for ${l.name}`); return; }
   }
   const t = computeTotals();
   const customerId = document.getElementById('billCustomer').value || null;
-  const amountPaid = Math.max(0, Math.min(t.total, parseFloat(document.getElementById('billAmountPaid').value)||0));
+  const inc = prevDueInc();
+  const rawPaid = Math.max(0, Math.min(t.total + inc, parseFloat(document.getElementById('billAmountPaid').value)||0));
+  const amountPaid = Math.min(t.total, rawPaid), extraPaid = rawPaid - amountPaid;
   const amountDue = Math.max(0, t.total - amountPaid);
   const sale = {
     id: uid('sal_'),
     date: new Date().toISOString(),
     customerId,
-    items: cart.map(l=>({ itemId:l.itemId, name:l.name, price:l.price, cost:(l.cost||0), qty:l.qty, returnedQty:0 })),
+    items: cart.map(l=>({ itemId:l.itemId, name:l.name, price:l.price, cost:(l.cost||0), qty:l.qty, unit:(l.unit||''), returnedQty:0 })),
     subtotal: t.subtotal, discount: t.discount,
     serviceChargeAmt: t.serviceChargeAmt,
     taxPct: t.taxPct, taxAmt: t.taxAmt,
     total: t.total, amountPaid, amountDue,
-    paymentMethod: document.getElementById('billPayment').value
+    paymentMethod: document.getElementById('billPayment').value,
+    serviceNote: (document.getElementById('billServiceNote').value||'').trim()
   };
-  cart.forEach(l=>{ const it = items.find(i=>i.id===l.itemId); it.qty -= l.qty; });
+  if(inc>0 && customerId){
+    sale.prevDue = custDue(customerId);
+    sale.prevDuePaid = applyDebtPayment(customerId, extraPaid, sale.paymentMethod);
+    sale.prevDueLeft = Math.round((sale.prevDue - sale.prevDuePaid)*100)/100;
+    document.getElementById('billIncludeDue').checked = false;
+  }
+  cart.forEach(l=>{ const it = items.find(i=>i.id===l.itemId); it.qty = round3(it.qty - l.qty); });
   sales.push(sale);
+  document.getElementById('billServiceNote').value='';
   save(K.items, items); save(K.sales, sales);
   cart = []; save('dm_cart_draft', cart);
   document.getElementById('billDiscount').value = 0;
@@ -1919,7 +2063,7 @@ function completeSale(){
 function showReceipt(saleId, justCompleted){
   const s = sales.find(x=>x.id===saleId); if(!s) return;
   const cust = customers.find(c=>c.id===s.customerId);
-  const rows = s.items.map(l=>`<tr><td>${esc(l.name)}</td><td style="text-align:center;">${l.qty}</td><td style="text-align:right;">${fmt(l.price)}</td><td style="text-align:right;">${fmt(l.price*l.qty)}</td></tr>`).join('');
+  const rows = s.items.map(l=>`<tr><td>${esc(l.name)}</td><td style="text-align:center;">${lineQtyText(l)}</td><td style="text-align:right;">${fmt(l.price)}${isLiquidUnit(l.unit)?'/L':''}</td><td style="text-align:right;">${fmt(lineAmt(l))}</td></tr>`).join('');
   const body = `
     <div class="r-head">
       <div class="rn">${esc(settings.shopName)}</div>
@@ -1930,6 +2074,7 @@ function showReceipt(saleId, justCompleted){
     <div>Receipt: ${s.id}</div>
     <div>Date: ${fmtDate(s.date)}</div>
     <div>Customer: ${cust?esc(cust.name):'Walk-in'}${cust&&cust.vehicleNo?' ('+esc(cust.vehicleNo)+')':''}</div>
+    ${s.serviceNote?`<div>Service: ${esc(s.serviceNote)}</div>`:''}
     <hr>
     <table style="width:100%;"><thead><tr><th style="text-align:left;">Item</th><th>Qty</th><th style="text-align:right;">Price</th><th style="text-align:right;">Amt</th></tr></thead><tbody>${rows}</tbody></table>
     <hr>
@@ -1940,8 +2085,9 @@ function showReceipt(saleId, justCompleted){
     <div style="display:flex;justify-content:space-between;" class="r-total"><span>TOTAL</span><span>${fmt(s.total)}</span></div>
     <div style="display:flex;justify-content:space-between;"><span>Paid</span><span>${fmt(s.amountPaid??s.total)}</span></div>
     ${(s.amountDue>0)?`<div style="display:flex;justify-content:space-between;"><span>Balance Due</span><span>${fmt(s.amountDue)}</span></div>`:''}
+    ${s.prevDue>0?`<hr><div style="display:flex;justify-content:space-between;"><span>Previous Due</span><span>${fmt(s.prevDue)}</span></div><div style="display:flex;justify-content:space-between;"><span>Paid on Previous Due</span><span>${fmt(s.prevDuePaid||0)}</span></div><div style="display:flex;justify-content:space-between;font-weight:800;"><span>Total Balance Due</span><span>${fmt((s.amountDue||0)+(s.prevDueLeft||0))}</span></div><hr>`:''}
     <div style="display:flex;justify-content:space-between;"><span>Payment</span><span>${esc(s.paymentMethod)}</span></div>
-    ${(s.returns&&s.returns.length>0)?`<hr><div style="font-weight:700;color:var(--red);margin-bottom:4px;">Returns / Refunds</div>${s.returns.map(r=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--red);"><span>${r.items.map(i=>i.name+' x'+i.qty).join(', ')}</span><span>-${fmt(r.refundAmount)}</span></div>`).join('')}<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:4px;"><span>Net Total</span><span>${fmt(saleNetTotal(s))}</span></div>`:''}
+    ${(s.returns&&s.returns.length>0)?`<hr><div style="font-weight:700;color:var(--red);margin-bottom:4px;">Returns / Refunds</div>${s.returns.map(r=>`<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--red);"><span>${r.items.map(i=>i.name+' x'+(isLiquidUnit(i.unit)?Math.round(i.qty*1000)+' ml':i.qty)).join(', ')}</span><span>-${fmt(r.refundAmount)}</span></div>`).join('')}<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:4px;"><span>Net Total</span><span>${fmt(saleNetTotal(s))}</span></div>`:''}
     <div class="r-foot">Thank you for trusting Dhanasiri Motors.<br>Genuine parts · Reliable service since ${esc(settings.since)}.</div>
   `;
   document.getElementById('receiptPrintArea').innerHTML = body;
@@ -1957,6 +2103,7 @@ function showReceipt(saleId, justCompleted){
     </div>
     <div class="modal-foot">
       ${saleCanReturn(s)?`<button class="btn btn-outline" style="margin-right:auto;" onclick="openReturnModal('${s.id}')">↩ Return / Refund</button>`:''}
+      <button class="btn btn-danger" ${saleCanReturn(s)?'':'style="margin-right:auto;"'} onclick="openDeleteBill('${s.id}')">🗑 Delete Bill</button>
       <button class="btn btn-outline" onclick="closeModal()">Close</button>
       <button class="btn btn-outline" onclick="printReceipt()">🖨 Print</button>
       <button class="btn btn-outline" onclick="downloadReceiptPDF('${s.id}')">📄 PDF</button>
@@ -1967,23 +2114,175 @@ function showReceipt(saleId, justCompleted){
 }
 
 /* =========================================================
+   CUSTOMER DEBT — add previous due to a new bill / receive payment only
+   ========================================================= */
+function custDue(id){ return Math.round(sales.filter(s=>s.customerId===id).reduce((a,s)=>a+(s.amountDue||0),0)*100)/100; }
+function prevDueInc(){
+  const box=document.getElementById('prevDueBox'), cb=document.getElementById('billIncludeDue');
+  if(!box||!cb||box.style.display==='none'||!cb.checked) return 0;
+  return custDue(document.getElementById('billCustomer').value);
+}
+function updatePrevDueBox(){
+  const id=document.getElementById('billCustomer').value, d=id?custDue(id):0;
+  const box=document.getElementById('prevDueBox');
+  box.style.display = d>0 ? 'block':'none';
+  document.getElementById('prevDueAmt').textContent = fmt(d);
+  if(d<=0) document.getElementById('billIncludeDue').checked=false;
+}
+function applyDebtPayment(custId, amount, method){
+  let left = Math.round((Number(amount)||0)*100)/100, applied = 0;
+  sales.filter(s=>s.customerId===custId && s.amountDue>0).sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
+    if(left<=0) return;
+    const pay = Math.min(left, s.amountDue);
+    s.amountDue = Math.round((s.amountDue-pay)*100)/100;
+    s.amountPaid = Math.round(((s.amountPaid||0)+pay)*100)/100;
+    (s.payments=s.payments||[]).push({ date:new Date().toISOString(), amount:pay, method:method||'Cash' });
+    left = Math.round((left-pay)*100)/100; applied += pay;
+  });
+  return Math.round(applied*100)/100;
+}
+function openReceivePayment(custId){
+  const c=customers.find(x=>x.id===custId); if(!c) return;
+  const d=custDue(custId); if(d<=0){ toast('No outstanding due'); return; }
+  openModal(`
+    <div class="modal-head"><h3>Receive Payment — ${esc(c.name)}</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="totals-row grand"><span>Outstanding Due</span><span class="mono">${fmt(d)}</span></div>
+      <div class="field-row" style="margin-top:12px;">
+        <div class="field"><label>Amount received (Rs.)</label><input type="number" id="rcvAmt" min="0" max="${d}" value="${d}"></div>
+        <div class="field"><label>Method</label><select id="rcvMethod"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select></div>
+      </div>
+      <p class="hint">Applied to the oldest unpaid bills first.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveReceivedPayment('${custId}')">Receive</button></div>
+  `);
+}
+function saveReceivedPayment(custId){
+  const amt=Math.min(custDue(custId), parseFloat(document.getElementById('rcvAmt').value)||0);
+  if(amt<=0){ toast('Enter an amount'); return; }
+  const done=applyDebtPayment(custId, amt, document.getElementById('rcvMethod').value);
+  save(K.sales, sales); closeModal(); renderCustomers(); renderBilling(); renderDashboard();
+  toast(`${fmt(done)} received · remaining due ${fmt(custDue(custId))}`);
+}
+document.getElementById('billCustomer').addEventListener('change', ()=>{
+  document.getElementById('billAmountPaid').removeAttribute('data-user-edited'); renderCart();
+});
+document.getElementById('billIncludeDue').addEventListener('change', ()=>{
+  document.getElementById('billAmountPaid').removeAttribute('data-user-edited'); renderCart();
+});
+
+/* =========================================================
+   DELETE BILL / DELETED BILLS (restore) — always asks for verification
+   ========================================================= */
+function deletedBills(){ if(!Array.isArray(settings.deletedSales)) settings.deletedSales=[]; return settings.deletedSales; }
+function verifyAction(msg, cb){
+  if(!hasLock()){ if(confirm(msg+'\n\n(Tip: set an owner password in Settings so this asks for the password.)')) cb(); return; }
+  openModal(`
+    <div class="modal-head"><h3>🔒 Verification needed</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><p class="hint" style="margin-top:0;">${esc(msg)}<br>Enter your password to continue.</p>${unlockFormHTML()}</div>
+  `);
+  wireUnlockForm(()=>{ secFails=0; closeModal(); cb(); });
+}
+function refreshAfterBillChange(){
+  renderDashboard(); renderStock(); updateReorderBadge();
+  if(document.getElementById('page-reports').classList.contains('active')) renderReports();
+  if(document.getElementById('page-expenses').classList.contains('active')) renderExpenses();
+  if(typeof renderCustomers==='function') renderCustomers();
+}
+function openDeleteBill(id){
+  const s = sales.find(x=>x.id===id); if(!s) return;
+  const cust = customers.find(c=>c.id===s.customerId);
+  openModal(`
+    <div class="modal-head"><h3>Delete Bill</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-top:0;">${fmtDate(s.date)} · ${cust?esc(cust.name):'Walk-in'} · ${s.items.length} item(s) · <b>${fmt(saleNetTotal(s))}</b></p>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13.5px;margin:12px 0;"><input type="checkbox" id="delBillRestock" checked> Put the items back into stock</label>
+      <p class="hint">The bill is removed from reports and totals. You can bring it back later from <b>Reports → Deleted Bills</b>.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDeleteBill('${s.id}')">Delete Bill</button></div>
+  `);
+}
+function confirmDeleteBill(id){
+  const restock = document.getElementById('delBillRestock').checked;
+  verifyAction('Delete this bill?', ()=>deleteBill(id, restock));
+}
+function deleteBill(id, restock){
+  const idx = sales.findIndex(x=>x.id===id); if(idx<0) return;
+  const s = sales[idx];
+  if(restock){
+    s.items.forEach(l=>{
+      const left = round3(l.qty - (l.returnedQty||0));
+      const it = items.find(i=>i.id===l.itemId);
+      if(it && left>0) it.qty = round3(it.qty + left);
+    });
+  }
+  deletedBills().push({ sale:s, deletedAt:new Date().toISOString(), restocked:!!restock });
+  sales.splice(idx,1);
+  save(K.items, items); save(K.sales, sales); save(K.settings, settings);
+  closeModal(); refreshAfterBillChange();
+  toast('Bill deleted'+(restock?' — items put back into stock':''));
+}
+function openDeletedBills(){
+  const list = [...deletedBills()].sort((a,b)=>b.deletedAt.localeCompare(a.deletedAt));
+  openModal(`
+    <div class="modal-head"><h3>Deleted Bills</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      ${list.length===0 ? '<div class="empty"><p>No deleted bills.</p></div>' : list.map(d=>{
+        const c = customers.find(x=>x.id===d.sale.customerId);
+        return `<div class="item-pick">
+          <div><div class="name">${fmtDate(d.sale.date)} · ${c?esc(c.name):'Walk-in'}</div>
+          <div class="meta">${d.sale.items.length} item(s) · ${fmt(saleNetTotal(d.sale))} · deleted ${fmtDate(d.deletedAt)}</div></div>
+          <button class="btn btn-primary btn-sm" onclick="restoreBill('${d.sale.id}')">Restore</button>
+        </div>`; }).join('')}
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal()">Close</button></div>
+  `, true);
+}
+function restoreBill(id){
+  const d = deletedBills().find(x=>x.sale.id===id); if(!d) return;
+  if(d.restocked){
+    for(const l of d.sale.items){
+      const left = round3(l.qty - (l.returnedQty||0));
+      const it = items.find(i=>i.id===l.itemId);
+      if(it && it.qty + 1e-9 < left){ toast(`Not enough stock for ${l.name} to restore this bill`); return; }
+    }
+  }
+  verifyAction('Restore this bill?', ()=>{
+    if(d.restocked){
+      d.sale.items.forEach(l=>{
+        const left = round3(l.qty - (l.returnedQty||0));
+        const it = items.find(i=>i.id===l.itemId);
+        if(it && left>0) it.qty = round3(it.qty - left);
+      });
+    }
+    sales.push(d.sale);
+    settings.deletedSales = deletedBills().filter(x=>x.sale.id!==id);
+    save(K.items, items); save(K.sales, sales); save(K.settings, settings);
+    closeModal(); refreshAfterBillChange();
+    toast('Bill restored');
+  });
+}
+
+/* =========================================================
    RETURNS / REFUNDS
    ========================================================= */
 function saleCanReturn(s){
-  return (s.items||[]).some(l => (l.qty - (l.returnedQty||0)) > 0);
+  return (s.items||[]).some(l => (l.qty - (l.returnedQty||0)) > 1e-6);
 }
 function openReturnModal(saleId){
   const s = sales.find(x=>x.id===saleId); if(!s) return;
-  const returnableLines = s.items.filter(l => (l.qty - (l.returnedQty||0)) > 0);
+  const returnableLines = s.items.filter(l => (l.qty - (l.returnedQty||0)) > 1e-6);
   openModal(`
     <div class="modal-head"><h3>Return / Refund Items</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
     <div class="modal-body">
       <p class="hint" style="margin-bottom:12px;">Enter how many of each item the customer is returning. Returned items go back into stock and the refund amount is calculated automatically.</p>
       ${returnableLines.map(l=>{
-        const avail = l.qty - (l.returnedQty||0);
+        const liq = isLiquidUnit(l.unit);
+        const avail = liq ? Math.round((l.qty - (l.returnedQty||0))*1000) : (l.qty - (l.returnedQty||0));
         return `<div class="field-row" style="align-items:end;">
-          <div class="field" style="flex:2;"><label>${esc(l.name)} <span class="hint" style="display:inline;">(sold ${l.qty}${l.returnedQty?', already returned '+l.returnedQty:''})</span></label>
-            <input type="number" class="return-qty-input" data-item-id="${l.itemId}" data-price="${l.price}" min="0" max="${avail}" step="1" value="0">
+          <div class="field" style="flex:2;"><label>${esc(l.name)} <span class="hint" style="display:inline;">(sold ${lineQtyText(l)}${l.returnedQty?', already returned '+(liq?Math.round(l.returnedQty*1000)+' ml':l.returnedQty):''})${liq?' — enter ml':''}</span></label>
+            <input type="number" class="return-qty-input" data-item-id="${l.itemId}" data-liquid="${liq?1:0}" data-price="${l.price}" min="0" max="${avail}" step="1" value="0">
           </div>
         </div>`;
       }).join('')}
@@ -2001,7 +2300,8 @@ function openReturnModal(saleId){
 function updateReturnRefundTotal(){
   let total = 0;
   document.querySelectorAll('.return-qty-input').forEach(inp=>{
-    const qty = Math.max(0, Math.min(parseInt(inp.max)||0, parseInt(inp.value)||0));
+    let qty = Math.max(0, Math.min(parseInt(inp.max)||0, parseInt(inp.value)||0));
+    if(inp.dataset.liquid==='1') qty = qty/1000;
     total += qty * parseFloat(inp.dataset.price);
   });
   document.getElementById('returnRefundTotal').textContent = fmt(total);
@@ -2012,22 +2312,24 @@ function saveReturn(saleId){
   let refundAmount = 0;
   document.querySelectorAll('.return-qty-input').forEach(inp=>{
     const max = parseInt(inp.max)||0;
-    const qty = Math.max(0, Math.min(max, parseInt(inp.value)||0));
+    let qty = Math.max(0, Math.min(max, parseInt(inp.value)||0));
     if(qty>0){
+      if(inp.dataset.liquid==='1') qty = round3(qty/1000);
       const itemId = inp.dataset.itemId;
       const line = s.items.find(l=>l.itemId===itemId);
-      returnLines.push({ itemId, name:line.name, qty, amount: qty*line.price });
-      refundAmount += qty*line.price;
+      const amount = Math.round(qty*line.price*100)/100;
+      returnLines.push({ itemId, name:line.name, qty, unit:(line.unit||''), amount });
+      refundAmount += amount;
     }
   });
   if(returnLines.length===0){ toast('Enter a quantity to return'); return; }
-  if(!confirm(`Refund ${fmt(refundAmount)} and restock ${returnLines.reduce((a,l)=>a+l.qty,0)} item(s)?`)) return;
+  if(!confirm(`Refund ${fmt(refundAmount)} and restock ${returnLines.length} item line(s)?`)) return;
 
   returnLines.forEach(rl=>{
     const line = s.items.find(l=>l.itemId===rl.itemId);
-    line.returnedQty = (line.returnedQty||0) + rl.qty;
+    line.returnedQty = round3((line.returnedQty||0) + rl.qty);
     const it = items.find(i=>i.id===rl.itemId);
-    if(it) it.qty += rl.qty;
+    if(it) it.qty = round3(it.qty + rl.qty);
   });
   if(!s.returns) s.returns = [];
   s.returns.push({ id: uid('ret_'), date: new Date().toISOString(), items: returnLines, refundAmount });
@@ -2062,9 +2364,10 @@ function buildReceiptText(s){
   lines.push(`Receipt: ${s.id}`);
   lines.push(`Date: ${fmtDate(s.date)}`);
   lines.push(`Customer: ${cust?cust.name:'Walk-in'}`);
+  if(s.serviceNote) lines.push(`Service: ${s.serviceNote}`);
   lines.push('-----------------------------');
   s.items.forEach(l=>{
-    lines.push(`${l.name} x${l.qty} = ${fmt(l.price*l.qty)}`);
+    lines.push(`${l.name} x${lineQtyText(l)} = ${fmt(lineAmt(l))}`);
   });
   lines.push('-----------------------------');
   lines.push(`Subtotal: ${fmt(s.subtotal)}`);
@@ -2104,7 +2407,7 @@ function drawReceiptCanvas(s){
   // First pass: measure height needed
   const itemLines = [];
   s.items.forEach(l=>{
-    itemLines.push({ name: l.name, qty: l.qty, amt: fmt(l.price*l.qty) });
+    itemLines.push({ name: l.name, qty: lineQtyText(l), amt: fmt(lineAmt(l)) });
   });
   const extraRows = [
     ['Subtotal', fmt(s.subtotal)],
@@ -2323,8 +2626,8 @@ async function downloadReceiptPDF(saleId){
   doc.setFont('helvetica','bold');
   s.items.forEach(l=>{
     doc.setFont('helvetica','normal');
-    doc.text(`${l.name}  x${l.qty}`, 20, y);
-    doc.text(fmt(l.price*l.qty), pageW-20, y, { align:'right' });
+    doc.text(`${l.name}  x${lineQtyText(l)}`, 20, y);
+    doc.text(fmt(lineAmt(l)), pageW-20, y, { align:'right' });
     y += 14;
   });
   y += 4;
@@ -2408,11 +2711,11 @@ function renderReports(){
       return `<tr>
         <td>${fmtDate(s.date)}</td>
         <td>${cust?esc(cust.name):'Walk-in'}</td>
-        <td>${s.items.length}</td>
+        <td>${s.items.length||'Service only'}</td>
         <td>${esc(s.paymentMethod)}</td>
         <td class="mono" style="font-weight:700;">${hasReturns?`<span style="text-decoration:line-through;color:var(--ink-faint);font-weight:400;font-size:11.5px;">${fmt(s.total)}</span><br>`:''}${fmt(saleNetTotal(s))}${hasReturns?' <span class="pill low" style="font-size:10px;">Returned</span>':''}</td>
         <td class="mono" style="color:var(--green);">${fmt(saleProfit(s))}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="showReceipt('${s.id}')">View</button></td>
+        <td><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="showReceipt('${s.id}')">View</button><button class="btn btn-danger btn-sm" onclick="openDeleteBill('${s.id}')">Delete</button></div></td>
       </tr>`;
     }).join('')}
   </tbody></table>`;
@@ -2658,6 +2961,274 @@ async function installApp(){
 }
 
 /* =========================================================
+   SECURITY — one password / fingerprint for the whole app AND the owner-only data
+   Stored only on this device (key dm_security): never synced to the cloud, never in backups.
+   ========================================================= */
+const SEC_KEY = 'dm_security';
+const OWNER_PAGES = ['owner','reports','expenses','settings'];
+const IDLE_LOCK_MS = 5*60*1000;
+let sec = (function(){ try{ return JSON.parse(localStorage.getItem(SEC_KEY))||{}; }catch(e){ return {}; } })();
+let ownerUnlocked = false, secLastActive = Date.now(), secFails = 0, secBlockedUntil = 0, secHiddenAt = 0;
+function saveSec(){ try{ localStorage.setItem(SEC_KEY, JSON.stringify(sec)); }catch(e){ toast('Could not save security settings'); } }
+function hasLock(){ return !!sec.hash; }
+function isOwnerOpen(){ return !hasLock() || ownerUnlocked; }
+function sens(txt){ return isOwnerOpen() ? txt : '••••••'; }
+
+function sha256hex(ascii){
+  const rr=(v,a)=>(v>>>a)|(v<<(32-a));
+  const mp=Math.pow, mw=mp(2,32);
+  let H0=sha256hex._h, K=sha256hex._k;
+  if(!K){
+    H0=[]; K=[]; const comp={}; let pc=0;
+    for(let c=2;pc<64;c++){
+      if(!comp[c]){
+        for(let i=c*c;i<313;i+=c) comp[i]=c;
+        if(pc<8) H0[pc]=(mp(c,.5)*mw)|0;
+        K[pc++]=(mp(c,1/3)*mw)|0;
+      }
+    }
+    sha256hex._h=H0; sha256hex._k=K;
+  }
+  const bitLen=ascii.length*8;
+  ascii+='\x80';
+  while(ascii.length%64-56) ascii+='\x00';
+  const words=[];
+  for(let i=0;i<ascii.length;i++){ words[i>>2]|=ascii.charCodeAt(i)<<(((3-i)%4)*8); }
+  words[words.length]=((bitLen/mw)|0);
+  words[words.length]=bitLen;
+  let hash=H0.slice(0);
+  for(let j=0;j<words.length;){
+    const w=words.slice(j,j+=16);
+    const old=hash; hash=hash.slice(0,8);
+    for(let i=0;i<64;i++){
+      const w15=w[i-15], w2=w[i-2];
+      const a=hash[0], e=hash[4];
+      const t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+K[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      const t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(t1+t2)|0].concat(hash);
+      hash[4]=(hash[4]+t1)|0;
+    }
+    for(let i=0;i<8;i++) hash[i]=(hash[i]+old[i])|0;
+  }
+  let out='';
+  for(let i=0;i<8;i++) for(let j=3;j+1;j--){ const b=(hash[i]>>(j*8))&255; out+=(b<16?0:'')+b.toString(16); }
+  return out;
+}
+function randHex(n){
+  const a=new Uint8Array(n);
+  if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(a); else for(let i=0;i<n;i++) a[i]=Math.floor(Math.random()*256);
+  return Array.from(a).map(b=>(b<16?'0':'')+b.toString(16)).join('');
+}
+function hashPw(pw, salt){
+  let h = salt+':'+unescape(encodeURIComponent(pw));
+  for(let i=0;i<4000;i++) h = sha256hex(h+salt);
+  return h;
+}
+function genRecovery(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const a=new Uint8Array(16);
+  if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(a); else for(let i=0;i<16;i++) a[i]=Math.floor(Math.random()*256);
+  const s=Array.from(a).map(b=>chars[b%chars.length]).join('');
+  return s.slice(0,4)+'-'+s.slice(4,8)+'-'+s.slice(8,12)+'-'+s.slice(12,16);
+}
+function normRecovery(c){ return (c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+function setPassword(pw, keepRecovery){
+  sec.salt = randHex(16); sec.hash = hashPw(pw, sec.salt);
+  let code = null;
+  if(!keepRecovery || !sec.recHash){
+    code = genRecovery(); sec.recSalt = randHex(16); sec.recHash = hashPw(normRecovery(code), sec.recSalt);
+  }
+  saveSec(); return code;
+}
+function checkPw(pw){ return !!sec.hash && hashPw(pw||'', sec.salt) === sec.hash; }
+function checkRecovery(c){ return !!sec.recHash && hashPw(normRecovery(c), sec.recSalt) === sec.recHash; }
+
+/* ---- fingerprint / face / screen-lock via WebAuthn (this device only) ---- */
+function bioSupported(){ return !!(window.PublicKeyCredential && navigator.credentials && window.isSecureContext); }
+function bioReady(){ return bioSupported() && !!(sec.bio && sec.bio.id); }
+function bufToB64(buf){ let s=''; new Uint8Array(buf).forEach(b=>s+=String.fromCharCode(b)); return btoa(s); }
+function b64ToBuf(b64){ const s=atob(b64); const a=new Uint8Array(s.length); for(let i=0;i<s.length;i++) a[i]=s.charCodeAt(i); return a.buffer; }
+async function bioRegister(){
+  const cred = await navigator.credentials.create({ publicKey:{
+    challenge: crypto.getRandomValues(new Uint8Array(32)),
+    rp:{ name: settings.shopName || 'Shop POS' },
+    user:{ id: crypto.getRandomValues(new Uint8Array(16)), name:'owner', displayName:'Owner' },
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+    authenticatorSelection:{ authenticatorAttachment:'platform', userVerification:'required', residentKey:'discouraged' },
+    timeout:60000, attestation:'none'
+  }});
+  if(!cred) throw new Error('cancelled');
+  sec.bio = { id: bufToB64(cred.rawId) }; saveSec();
+}
+async function bioAuth(){
+  const cred = await navigator.credentials.get({ publicKey:{
+    challenge: crypto.getRandomValues(new Uint8Array(32)),
+    allowCredentials:[{ type:'public-key', id: b64ToBuf(sec.bio.id), transports:['internal'] }],
+    userVerification:'required', timeout:60000
+  }});
+  return !!cred;
+}
+
+/* ---- lock / unlock ---- */
+function unlockFormHTML(){
+  return `<div id="lockBody">
+    <div class="field"><label>Password</label><input type="password" id="uPw" autocomplete="current-password" placeholder="Enter password"></div>
+    <p class="hint" id="uMsg" style="color:var(--red);display:none;margin:0 0 10px;"></p>
+    <button class="btn btn-primary" id="uBtn" style="width:100%;">🔓 Unlock</button>
+    ${bioReady()?`<button class="btn btn-outline" id="uBio" style="width:100%;margin-top:8px;">👆 Use fingerprint / device unlock</button>`:''}
+    <p style="text-align:center;margin:14px 0 0;font-size:12.5px;"><a href="#" id="uForgot" style="color:var(--ink-soft);">Forgot password?</a></p>
+  </div>`;
+}
+function uMsg(t){ const m=document.getElementById('uMsg'); if(m){ m.textContent=t||''; m.style.display=t?'block':'none'; } }
+function wireUnlockForm(onOk){
+  const pw=document.getElementById('uPw');
+  const tryPw=()=>{
+    const now=Date.now();
+    if(now<secBlockedUntil){ uMsg('Too many attempts. Wait '+Math.ceil((secBlockedUntil-now)/1000)+' s.'); return; }
+    if(checkPw(pw.value)){ onOk(); return; }
+    secFails++; pw.value='';
+    if(secFails>=5){ secBlockedUntil=Date.now()+30000; secFails=0; uMsg('Too many wrong attempts. Try again in 30 seconds.'); }
+    else uMsg('Wrong password.');
+    pw.focus();
+  };
+  document.getElementById('uBtn').onclick=tryPw;
+  pw.addEventListener('keydown',e=>{ if(e.key==='Enter') tryPw(); });
+  const b=document.getElementById('uBio');
+  if(b) b.onclick=async()=>{ try{ if(await bioAuth()) onOk(); }catch(e){ uMsg('Fingerprint not recognised — use your password.'); } };
+  document.getElementById('uForgot').onclick=e=>{ e.preventDefault(); showRecoveryForm(onOk); };
+  setTimeout(()=>pw.focus(),0);
+}
+function showRecoveryForm(onOk){
+  document.getElementById('lockBody').innerHTML = `
+    <p class="hint" style="margin-top:0;">Enter the recovery code you saved when you set the password, then choose a new password.</p>
+    <div class="field"><label>Recovery code</label><input type="text" id="rCode" autocomplete="off" placeholder="XXXX-XXXX-XXXX-XXXX"></div>
+    <div class="field"><label>New password</label><input type="password" id="rNew" autocomplete="new-password"></div>
+    <div class="field"><label>Confirm new password</label><input type="password" id="rNew2" autocomplete="new-password"></div>
+    <p class="hint" id="uMsg" style="color:var(--red);display:none;margin:0 0 10px;"></p>
+    <button class="btn btn-primary" id="rBtn" style="width:100%;">Reset password</button>
+    <p style="text-align:center;margin:14px 0 0;font-size:12.5px;"><a href="#" id="rBack" style="color:var(--ink-soft);">← Back</a></p>`;
+  document.getElementById('rBtn').onclick=()=>{
+    const code=document.getElementById('rCode').value, a=document.getElementById('rNew').value, b=document.getElementById('rNew2').value;
+    if(!checkRecovery(code)){ uMsg('That recovery code is not correct.'); return; }
+    if(a.length<4){ uMsg('Password must be at least 4 characters.'); return; }
+    if(a!==b){ uMsg('The two passwords do not match.'); return; }
+    setPassword(a, true); toast('Password reset'); onOk();
+  };
+  document.getElementById('rBack').onclick=e=>{ e.preventDefault(); document.getElementById('lockBody').outerHTML=unlockFormHTML(); wireUnlockForm(onOk); };
+}
+function lockScreenVisible(){ return document.getElementById('lockScreen').classList.contains('show'); }
+function showLockScreen(){
+  const el=document.getElementById('lockScreen');
+  el.innerHTML=`<div class="lock-card"><h2>🔒 ${esc(settings.shopName||'Locked')}</h2><p class="sub">Locked — enter your password${bioReady()?' or use your fingerprint':''} to continue.</p>${unlockFormHTML()}</div>`;
+  el.classList.add('show');
+  wireUnlockForm(unlockOwner);
+}
+function hideLockScreen(){ const el=document.getElementById('lockScreen'); el.classList.remove('show'); el.innerHTML=''; }
+function openUnlockModal(cb){
+  openModal(`
+    <div class="modal-head"><h3>🔒 Owner access</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-body"><p class="hint" style="margin-top:0;">Profit, stock value, reports, expenses and settings are locked. Enter your password${bioReady()?' or use your fingerprint':''}.</p>${unlockFormHTML()}</div>
+  `);
+  wireUnlockForm(()=>{ unlockOwner(); closeModal(); if(cb) cb(); });
+}
+function requireOwner(cb){
+  if(isOwnerOpen()){ if(cb) cb(); return; }
+  if(lockScreenVisible()) return;
+  openUnlockModal(cb);
+}
+function unlockOwner(){
+  ownerUnlocked = true; secLastActive = Date.now(); secFails = 0;
+  hideLockScreen(); renderDashboard();
+}
+function clearOwnerDOM(){
+  ['statStockValue','statTodayProfit','statMonthNet','repRevenue','repCount','repAvg','repProfit','expTotal','expRevenue','expNetProfit'].forEach(id=>{
+    const e=document.getElementById(id); if(e) e.textContent='••••••';
+  });
+  ['reportsTableWrap','expensesTableWrap'].forEach(id=>{ const e=document.getElementById(id); if(e) e.innerHTML=''; });
+}
+function lockNow(){
+  if(!hasLock()){ toast('Set a password first'); return; }
+  ownerUnlocked = false; clearOwnerDOM(); closeModal();
+  const cur=(document.querySelector('.page.active')||{}).id||'';
+  if(OWNER_PAGES.some(p=>cur==='page-'+p)) switchPage('dashboard');
+  renderDashboard();
+  if(sec.lockApp) showLockScreen();
+}
+function secBoot(){ if(hasLock() && sec.lockApp) showLockScreen(); }
+
+/* auto-lock: 5 min without touching the app, or the app was in the background for 1+ min */
+['click','keydown','touchstart','pointerdown'].forEach(ev=>document.addEventListener(ev,()=>{ secLastActive=Date.now(); },true));
+setInterval(()=>{ if(hasLock() && ownerUnlocked && Date.now()-secLastActive>IDLE_LOCK_MS) lockNow(); },15000);
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ secHiddenAt=Date.now(); }
+  else if(hasLock() && ownerUnlocked && secHiddenAt && Date.now()-secHiddenAt>60000){ lockNow(); }
+});
+
+/* ---- Owner page: set / change password, fingerprint, app lock ---- */
+function renderOwner(){ renderDashboard(); renderSecurityPanel(); }
+async function renderSecurityPanel(){
+  const el=document.getElementById('securityPanel'); if(!el) return;
+  if(!hasLock()){
+    el.innerHTML=`<p class="hint" style="margin-top:0;">No password is set yet, so anyone using this app can see profit, stock value, reports, expenses and settings. Set one password — it opens this Owner section, and you can also use your fingerprint and lock the whole app with the same lock.</p>
+      <button class="btn btn-primary" onclick="openSetPasswordModal(false)">🔐 Set password</button>`;
+    return;
+  }
+  let bioAvail=false;
+  if(bioSupported()){ try{ bioAvail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); }catch(e){} }
+  const bioRow = sec.bio
+    ? `<div class="sec-row"><div><div class="t">Fingerprint / device unlock — ON</div><div class="d">This device can unlock with fingerprint, face or screen lock.</div></div><button class="btn btn-outline btn-sm" onclick="disableBio()">Turn off</button></div>`
+    : (bioAvail
+      ? `<div class="sec-row"><div><div class="t">Fingerprint / device unlock</div><div class="d">Unlock with fingerprint, face or screen lock on this device (set up once per device).</div></div><button class="btn btn-primary btn-sm" onclick="enableBio()">Turn on</button></div>`
+      : `<div class="sec-row"><div><div class="t">Fingerprint / device unlock</div><div class="d">Not available here. It needs HTTPS (or localhost) and a device with fingerprint, face or screen lock set up.</div></div></div>`);
+  el.innerHTML=`
+    <div class="sec-row"><div><div class="t">Password — set ✔</div><div class="d">Used for the Owner section and (if enabled) the whole app.</div></div><button class="btn btn-outline btn-sm" onclick="openSetPasswordModal(true)">Change</button></div>
+    ${bioRow}
+    <div class="sec-row"><div><div class="t">Also lock the whole app</div><div class="d">Off: staff can bill and manage stock freely; only Owner, Reports, Expenses and Settings are locked (and lock again when you leave them). On: nobody can use the app until it is unlocked.</div></div><input type="checkbox" ${sec.lockApp?'checked':''} onchange="setLockApp(this.checked)" style="width:20px;height:20px;"></div>
+    <div class="sec-row"><div><div class="d">Locks again automatically after 5 minutes without use.</div></div><button class="btn btn-danger btn-sm" onclick="removeLock()">Remove lock</button></div>`;
+}
+function openSetPasswordModal(isChange){
+  openModal(`
+    <div class="modal-head"><h3>${isChange?'Change password':'Set password'}</h3><button class="icon-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>New password</label><input type="password" id="spNew" autocomplete="new-password"></div>
+      <div class="field"><label>Confirm password</label><input type="password" id="spNew2" autocomplete="new-password"></div>
+      <p class="hint" id="spMsg" style="color:var(--red);display:none;"></p>
+      <p class="hint">At least 4 characters. Pick something staff cannot guess.</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="savePasswordForm(${isChange?'true':'false'})">Save</button></div>`);
+  setTimeout(()=>{ const i=document.getElementById('spNew'); if(i) i.focus(); },0);
+}
+function savePasswordForm(isChange){
+  const a=document.getElementById('spNew').value, b=document.getElementById('spNew2').value;
+  const msg=document.getElementById('spMsg');
+  const bad=t=>{ msg.textContent=t; msg.style.display='block'; };
+  if(a.length<4){ bad('Password must be at least 4 characters.'); return; }
+  if(a!==b){ bad('The two passwords do not match.'); return; }
+  const code=setPassword(a, isChange);
+  ownerUnlocked=true; secLastActive=Date.now();
+  renderSecurityPanel(); renderDashboard();
+  if(code){
+    openModal(`
+      <div class="modal-head"><h3>Save your recovery code</h3></div>
+      <div class="modal-body">
+        <p style="margin-top:0;">If you ever forget the password, this code is the only way to reset it. Write it on paper and keep it safe — it will not be shown again.</p>
+        <div class="mono" style="font-size:22px;font-weight:800;letter-spacing:.06em;text-align:center;padding:16px;background:var(--surface-alt);border:1px dashed var(--border-strong);border-radius:8px;">${code}</div>
+      </div>
+      <div class="modal-foot"><button class="btn btn-primary" onclick="closeModal()">I have saved it</button></div>`);
+  } else { closeModal(); toast('Password changed'); }
+}
+async function enableBio(){
+  try{ await bioRegister(); toast('Fingerprint unlock turned on'); }
+  catch(e){ toast(e && e.name==='NotAllowedError' ? 'Fingerprint setup cancelled' : 'Could not set up fingerprint on this device'); }
+  renderSecurityPanel();
+}
+function disableBio(){ delete sec.bio; saveSec(); renderSecurityPanel(); toast('Fingerprint unlock turned off'); }
+function setLockApp(on){ sec.lockApp=!!on; saveSec(); toast(on?'The app will ask to unlock when opened':'Whole-app lock turned off'); }
+function removeLock(){
+  if(!confirm('Remove the password? Anyone using this app will be able to see profit, reports and settings.')) return;
+  sec = {}; saveSec(); ownerUnlocked=false; hideLockScreen(); renderSecurityPanel(); renderDashboard(); toast('Lock removed');
+}
+
+/* =========================================================
    CLOCK + INIT
    ========================================================= */
 function tickClock(){
@@ -2668,6 +3239,7 @@ setInterval(tickClock, 1000); tickClock();
 
 (function init(){
   const start = (location.hash||'').replace('#','');
+  secBoot();
   renderDashboard();
   updateReorderBadge();
   renderParkedButton();
