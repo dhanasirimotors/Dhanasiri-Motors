@@ -545,7 +545,11 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="stockSearch" placeholder="Search stock...">
           </div>
-          <button class="btn btn-primary" onclick="openItemModal(null)">+ Add Item</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-outline" onclick="document.getElementById('itemsCsvFile').click()">⬆ Import CSV</button>
+            <input type="file" id="itemsCsvFile" accept=".csv,text/csv" style="display:none;">
+            <button class="btn btn-primary" onclick="openItemModal(null)">+ Add Item</button>
+          </div>
         </div>
         <div class="panel-body" style="padding-top:10px;" id="stockTableWrap"></div>
       </div>
@@ -1454,6 +1458,54 @@ function saveItem(id){
   save(K.items, items); closeModal(); renderStock(); renderDashboard(); updateReorderBadge();
   toast('Item saved');
 }
+
+/* =========================================================
+   IMPORT STOCK FROM CSV (new items are added; existing items get qty added + latest cost)
+   Columns: name, partNumber, category, qty, costPrice, sellPrice, minQty, unit, supplier
+   ========================================================= */
+function parseCsv(text){
+  const rows=[]; let row=[], cur='', q=false;
+  text = text.replace(/^\uFEFF/,'');
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else q=false; } else cur+=c; }
+    else if(c==='"') q=true;
+    else if(c===','){ row.push(cur); cur=''; }
+    else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; row.push(cur); cur=''; if(row.some(x=>x.trim()!=='')) rows.push(row); row=[]; }
+    else cur+=c;
+  }
+  row.push(cur); if(row.some(x=>x.trim()!=='')) rows.push(row);
+  return rows;
+}
+document.getElementById('itemsCsvFile').addEventListener('change', function(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const rows=parseCsv(String(r.result)); const head=rows.shift().map(h=>h.trim().toLowerCase());
+      const col=n=>head.indexOf(n.toLowerCase());
+      const get=(row,n)=>{ const i=col(n); return i<0?'':(row[i]||'').trim(); };
+      if(col('name')<0) throw new Error('"name" column not found');
+      const list=rows.map(w=>({ name:get(w,'name'), partNumber:get(w,'partNumber'), category:get(w,'category'),
+        qty:parseFloat(get(w,'qty'))||0, costPrice:parseFloat(get(w,'costPrice'))||0, sellPrice:parseFloat(get(w,'sellPrice'))||0,
+        minQty:parseFloat(get(w,'minQty'))||0, unit:get(w,'unit')||'pcs', supplier:get(w,'supplier') })).filter(x=>x.name);
+      const findIt=x=>items.find(i=>(x.partNumber && i.partNumber===x.partNumber) || i.name.trim().toLowerCase()===x.name.toLowerCase());
+      const existing=list.filter(findIt).length, fresh=list.length-existing;
+      if(!list.length){ toast('No items found in the file'); return; }
+      if(!confirm(`Import ${list.length} item(s)?\n• ${fresh} new item(s) will be added\n• ${existing} existing item(s) will get the quantity added and the cost price updated`)) return;
+      list.forEach(x=>{
+        const it=findIt(x);
+        if(it){ it.qty=round3((it.qty||0)+x.qty); if(x.costPrice) it.costPrice=x.costPrice; }
+        else items.push({ id:uid('itm_'), name:x.name, partNumber:x.partNumber, category:x.category, costPrice:x.costPrice, sellPrice:x.sellPrice,
+          qty:x.qty, minQty:x.minQty, unit:x.unit, supplier:x.supplier, supplierPhone:'', reorderQty:0 });
+      });
+      save(K.items, items); renderStock(); renderDashboard(); updateReorderBadge();
+      toast(`Imported ${list.length} item(s)`);
+    }catch(err){ toast('Could not read CSV: '+err.message); }
+    e.target.value='';
+  };
+  r.readAsText(f);
+});
 
 /* =========================================================
    REORDERS — wholesale purchase reminders
