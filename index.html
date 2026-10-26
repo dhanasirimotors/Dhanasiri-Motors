@@ -4035,5 +4035,85 @@ if('serviceWorker' in navigator){
 })();
 </script>
 
+<script>
+/* v3 sync engine — record-level merge so devices never overwrite each other */
+(function(){
+  var ARR=['items','customers','sales','reminders','parkedSales','expenses'];
+  var G={items:function(){return items},customers:function(){return customers},sales:function(){return sales},reminders:function(){return reminders},parkedSales:function(){return parkedSales},expenses:function(){return expenses}};
+  var base={},busy=false,warned=false,box={};
+  try{box=JSON.parse(localStorage.getItem('dm_outbox')||'{}')}catch(e){}
+  function strip(r){var o=Object.assign({},r);delete o._u;return o}
+  function idx(a){var m={};(a||[]).forEach(function(r){if(r&&r.id!==undefined)m[String(r.id)]=JSON.stringify(strip(r))});return m}
+  function persist(){try{localStorage.setItem('dm_outbox',JSON.stringify(box))}catch(e){}}
+  function pend(){var n=0;Object.keys(box).forEach(function(f){n+=Object.keys(box[f].ch||{}).length+Object.keys(box[f].del||{}).length});return n}
+  function rebase(){ARR.forEach(function(f){base[f]=idx(G[f]())})}
+  function overlay(arr,bx,tomb){
+    var a=(arr||[]).slice(),pos;
+    function re(){pos={};a.forEach(function(r,i){pos[String(r.id)]=i})}
+    re();var del=bx.del||{};
+    a=a.filter(function(r){return !(String(r.id) in del)});re();
+    Object.keys(bx.ch||{}).forEach(function(id){
+      var e=bx.ch[id],r=e.r,i=pos[id];
+      if(tomb&&tomb[id]>r._u)return;
+      if(i===undefined){pos[id]=a.length;a.push(r);return}
+      var rem=a[i],m=Object.assign({},(rem._u||0)>(r._u||0)?rem:r);
+      if(e.d!==undefined&&typeof rem.qty==='number')m.qty=rem.qty+e.d;
+      m._u=Math.max(rem._u||0,r._u||0);a[i]=m});
+    return a}
+  /* status pill */
+  var pill=document.createElement('button');pill.className='btn btn-outline btn-sm';pill.style.cssText='font-size:12px;padding:6px 10px';
+  var tb=document.getElementById('themeBtn');tb.parentNode.insertBefore(pill,tb.parentNode.firstChild);
+  function setS(s,msg){
+    var n=pend();
+    pill.textContent=s==='err'?'⚠ Sync error':s==='sync'?'⟳ Syncing…':(!navigator.onLine||n)?'⏸ '+(n||'')+' pending':'☁ Synced';
+    pill.title=msg||'Tap to sync now'}
+  function pull(){if(!cloudDocRef||!navigator.onLine)return Promise.resolve();
+    return cloudDocRef.get({source:'server'}).then(function(s){if(s.exists)cloudApplyRemoteData(s.data())}).catch(function(){})}
+  function flush(){
+    if(busy||!cloudDocRef||!navigator.onLine){setS('ok');return}
+    var fs=Object.keys(box).filter(function(f){return Object.keys(box[f].ch||{}).length||Object.keys(box[f].del||{}).length});
+    if(!fs.length){setS('ok');return}
+    busy=true;setS('sync');var sent=JSON.stringify(box);
+    cloudDb.runTransaction(function(tx){return tx.get(cloudDocRef).then(function(snap){
+      var d=snap.exists?snap.data():{},out={},tomb=Object.assign({},d._del||{}),cut=Date.now()-60*864e5;
+      fs.forEach(function(f){
+        out[f]=overlay(d[f],box[f],tomb[f]);
+        var t=Object.assign({},tomb[f]);Object.keys(box[f].del||{}).forEach(function(id){t[id]=box[f].del[id]});
+        Object.keys(t).forEach(function(id){if(t[id]<cut)delete t[id]});tomb[f]=t});
+      out._del=tomb;
+      if(JSON.stringify(out).length>850000&&!warned){warned=true;toast('⚠ Cloud data is nearly full (1MB limit). Export a backup and archive old bills.')}
+      tx.set(cloudDocRef,out,{merge:true})})})
+    .then(function(){var cur=JSON.parse(sent);fs.forEach(function(f){box[f]={ch:{},del:{}}});persist();busy=false;setS('ok');pull()})
+    .catch(function(e){busy=false;setS('err',(e&&e.code||'')+' '+(e&&e.message||''));
+      if(e&&/exhausted|too large|invalid/i.test((e.code||'')+(e.message||'')))toast('⚠ Cloud save failed: data too big for one document')})}
+  var _cs=cloudSave;
+  cloudSave=function(key,val){
+    var f=cloudKeyToField[key];if(f==='parked')f='parkedSales'; /* original code wrote 'parked' but read 'parkedSales' */
+    if(cloudApplyingRemote)return;
+    if(ARR.indexOf(f)<0||!cloudDocRef||!Array.isArray(val)||!val.every(function(r){return r&&r.id!==undefined}))return _cs(key,val);
+    var b=base[f]||(base[f]={}),bx=box[f]||(box[f]={ch:{},del:{}}),now=Date.now(),seen={};
+    val.forEach(function(r){var id=String(r.id),j=JSON.stringify(strip(r));seen[id]=1;if(b[id]===j)return;
+      var prev=b[id]?JSON.parse(b[id]):null;r._u=now;var e=bx.ch[id]||(bx.ch[id]={d:0});e.r=r;
+      if(f==='items'&&typeof r.qty==='number'&&prev&&typeof prev.qty==='number')e.d+=r.qty-prev.qty;
+      delete bx.del[id];b[id]=j});
+    Object.keys(b).forEach(function(id){if(!seen[id]){bx.del[id]=now;delete bx.ch[id];delete b[id]}});
+    persist();setS('sync');flush()};
+  var _ar=cloudApplyRemoteData;
+  cloudApplyRemoteData=function(d){
+    var before=parkedSales.length;d=Object.assign({},d);
+    ARR.forEach(function(f){if(d[f]!==undefined&&box[f])d[f]=overlay(d[f],box[f],(d._del||{})[f])});
+    _ar(d);rebase();
+    if(parkedSales.length>before)toast('📥 New held bill from another device');
+    setS('ok')};
+  rebase();setS('ok');
+  pill.onclick=function(){flush();pull().then(function(){toast('Synced')})};
+  window.addEventListener('online',function(){flush();pull()});
+  window.addEventListener('offline',function(){setS('ok')});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden){flush();pull()}});
+  setInterval(function(){flush()},30000);
+  setTimeout(flush,2500);
+})();
+</script>
+
 </body>
 </html>
