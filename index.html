@@ -244,6 +244,8 @@
   .ml-chip:hover{background:var(--border);}
   #lockScreen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px;}
   #lockScreen.show{display:flex;}
+  #authGate{position:fixed;inset:0;z-index:10000;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px;}
+  #authGate.show{display:flex;}
   .lock-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-md);padding:26px 22px;width:100%;max-width:360px;}
   .lock-card h2{margin:0 0 4px;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.03em;font-size:20px;}
   .lock-card .sub{color:var(--ink-soft);font-size:13px;margin:0 0 18px;}
@@ -603,6 +605,7 @@ h1,h2,h3,.display{text-transform:none;font-style:normal;letter-spacing:-.01em;fo
 <!-- Firebase (compat SDK — works with plain <script> tags, no build step) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -664,7 +667,7 @@ h1,h2,h3,.display{text-transform:none;font-style:normal;letter-spacing:-.01em;fo
       </button>
     </nav>
     <div class="sidebar-footer">
-      <strong>Offline mode</strong><br>Data stays on this device.
+      <strong>Cloud sync on</strong><br><span id="acctEmail">Signed-in users only.</span>
     </div>
   </aside>
 
@@ -678,6 +681,7 @@ h1,h2,h3,.display{text-transform:none;font-style:normal;letter-spacing:-.01em;fo
         <button class="btn btn-outline btn-sm theme-btn" id="themeBtn" title="Dark / Light  (Alt+D)" aria-label="Toggle theme">🌙</button>
         <div id="clock"></div>
         <button class="btn btn-outline btn-sm install-btn" id="installBtnTop" onclick="installApp()" style="display:none;">⬇ Install App</button>
+        <button class="btn btn-outline btn-sm" id="signOutBtn" onclick="signOutApp()" style="display:none;">Sign out</button>
       </div>
     </header>
 
@@ -961,6 +965,7 @@ h1,h2,h3,.display{text-transform:none;font-style:normal;letter-spacing:-.01em;fo
 </div>
 
 <div id="modalRoot"></div>
+<div id="authGate"></div>
 <div id="lockScreen"></div>
 <div id="toast"></div>
 <div id="printRoot" style="display:none;"><div id="receiptPrintArea"></div></div>
@@ -1422,7 +1427,7 @@ function cloudRefreshCurrentView(){
 }
 function cloudInit(){
   try{
-    const app = firebase.initializeApp(firebaseConfig);
+    const app = (firebase.apps && firebase.apps.length) ? firebase.app() : firebase.initializeApp(firebaseConfig);
     cloudDb = firebase.firestore();
     cloudDb.enablePersistence({ synchronizeTabs:true }).catch(()=>{ /* multiple tabs / unsupported browser — fine, still works without offline cache */ });
     cloudDocRef = cloudDb.collection('shops').doc('dhanasiri-motors-pos');
@@ -3560,6 +3565,116 @@ function tickClock(){
 }
 setInterval(tickClock, 1000); tickClock();
 
+/* =========================================================
+   LOGIN — Firebase Authentication (email + password)
+   Accounts are created by the owner in the Firebase console (no self sign-up here).
+   The cloud data is only read after a successful sign-in, and the Firestore
+   rules decide which accounts are allowed to read / write it.
+   ========================================================= */
+let authUser = null;
+const SIGNED_KEY = 'dm_signed_in_before';
+function authEl(){ return document.getElementById('authGate'); }
+function hideAuthGate(){ const g = authEl(); g.classList.remove('show'); g.innerHTML = ''; }
+function showAuthGate(state, msg){
+  const g = authEl();
+  if(state === 'checking'){
+    g.innerHTML = `<div class="lock-card" style="text-align:center;"><h2>${esc(settings.shopName||'Dhanasiri Motors')}</h2><p class="sub" style="margin:0;">Checking sign-in…</p></div>`;
+    g.classList.add('show'); return;
+  }
+  g.innerHTML = `<div class="lock-card">
+      <h2>${esc(settings.shopName||'Dhanasiri Motors')}</h2>
+      <p class="sub">Sign in to open the shop system.</p>
+      <button class="btn btn-primary" style="width:100%;padding:12px;" id="agGoogle">Continue with Google</button>
+      <div id="agMsg" style="font-size:12.5px;min-height:18px;margin:10px 0;${state==='error'?'color:var(--red);':'color:var(--ink-soft);'}">${esc(msg||'')}</div>
+      <div style="text-align:center;"><a href="#" id="agShowEmail" style="font-size:12.5px;color:var(--ink-soft);">Use email &amp; password instead</a></div>
+      <div id="agEmailBox" style="display:none;margin-top:14px;">
+        <div class="field"><label>Email</label><input type="email" id="agEmail" autocomplete="username" autocapitalize="off"></div>
+        <div class="field"><label>Password</label><input type="password" id="agPw" autocomplete="current-password"></div>
+        <button class="btn btn-outline" style="width:100%;padding:11px;" id="agGo">Sign in with email</button>
+        <div style="margin-top:12px;text-align:center;"><a href="#" id="agForgot" style="font-size:12.5px;color:var(--ink-soft);">Forgot password?</a></div>
+      </div>
+    </div>`;
+  g.classList.add('show');
+  const $ = id => document.getElementById(id);
+  const say = (t, bad) => { const m = $('agMsg'); m.textContent = t; m.style.color = bad ? 'var(--red)' : 'var(--green)'; };
+  $('agShowEmail').onclick = e => { e.preventDefault(); $('agEmailBox').style.display = 'block'; e.target.style.display = 'none'; $('agEmail').focus(); };
+  $('agGoogle').onclick = async () => {
+    $('agGoogle').disabled = true; say('Opening Google sign-in…');
+    const prov = new firebase.auth.GoogleAuthProvider();
+    prov.setCustomParameters({ prompt:'select_account' });
+    try{ await firebase.auth().signInWithPopup(prov); }
+    catch(e){
+      if(e && (e.code==='auth/popup-blocked' || e.code==='auth/operation-not-supported-in-this-environment')){
+        try{ await firebase.auth().signInWithRedirect(prov); return; }catch(e2){ e = e2; }
+      }
+      $('agGoogle').disabled = false; say(authErrText(e), true);
+    }
+  };
+  const go = async () => {
+    const email = $('agEmail').value.trim(), pw = $('agPw').value;
+    if(!email || !pw){ say('Enter your email and password.', true); return; }
+    $('agGo').disabled = true; say('Signing in…');
+    try{ await firebase.auth().signInWithEmailAndPassword(email, pw); }
+    catch(e){ $('agGo').disabled = false; say(authErrText(e), true); $('agPw').value = ''; }
+  };
+  $('agGo').onclick = go;
+  $('agPw').addEventListener('keydown', e=>{ if(e.key==='Enter') go(); });
+  $('agEmail').addEventListener('keydown', e=>{ if(e.key==='Enter') $('agPw').focus(); });
+  $('agForgot').onclick = async e => {
+    e.preventDefault();
+    const email = $('agEmail').value.trim();
+    if(!email){ say('Type your email above first, then tap "Forgot password?".', true); return; }
+    try{ await firebase.auth().sendPasswordResetEmail(email); }catch(err){ if(err && err.code==='auth/network-request-failed'){ say(authErrText(err), true); return; } }
+    say('If that email has an account, a password-reset link has been sent. Check your inbox.');
+  };
+  setTimeout(()=>{ const f = $('agEmail'); if(f) f.focus(); }, 50);
+}
+function authErrText(e){
+  const c = (e && e.code) || '';
+  if(c==='auth/invalid-credential' || c==='auth/wrong-password' || c==='auth/user-not-found' || c==='auth/invalid-email') return 'Email or password is not correct.';
+  if(c==='auth/too-many-requests') return 'Too many attempts. Wait a few minutes and try again.';
+  if(c==='auth/network-request-failed') return 'No internet connection. Connect and try again.';
+  if(c==='auth/user-disabled') return 'This account has been disabled.';
+  if(c==='auth/popup-closed-by-user' || c==='auth/cancelled-popup-request') return 'Sign-in was cancelled.';
+  if(c==='auth/unauthorized-domain') return 'This website address is not allowed yet. In Firebase: Authentication → Settings → Authorized domains → add it.';
+  if(c==='auth/operation-not-allowed') return 'This sign-in method is not turned on in Firebase yet.';
+  return 'Could not sign in. ' + (c || 'Try again.');
+}
+function updateAccountUI(){
+  const em = document.getElementById('acctEmail'); if(em) em.textContent = authUser ? authUser.email : 'Signed-in users only.';
+  const b = document.getElementById('signOutBtn'); if(b) b.style.display = authUser ? 'inline-flex' : 'none';
+}
+function signOutApp(){
+  if(!confirm('Sign out of this device? You will need your email and password to open the system again.')) return;
+  try{ localStorage.removeItem(SIGNED_KEY); }catch(e){}
+  if(typeof firebase!=='undefined' && firebase.auth){ firebase.auth().signOut().finally(()=>location.reload()); } else location.reload();
+}
+function authBoot(){
+  let had = false; try{ had = localStorage.getItem(SIGNED_KEY)==='1'; }catch(e){}
+  if(typeof firebase==='undefined' || !firebase.auth){
+    // login service could not load (e.g. no internet). A device that has signed in before keeps working from its own saved data.
+    if(had){ toast('Offline — working from this device\'s saved data'); return; }
+    showAuthGate('login', 'Could not reach the login service. Check the internet connection and reload.');
+    document.getElementById('agGoogle').disabled = true;
+    return;
+  }
+  try{ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig); }catch(e){ console.warn(e); }
+  showAuthGate('checking');
+  let first = true;
+  firebase.auth().onAuthStateChanged(user=>{
+    if(user){
+      authUser = user;
+      try{ localStorage.setItem(SIGNED_KEY, '1'); }catch(e){}
+      hideAuthGate(); updateAccountUI();
+      if(!cloudDocRef) cloudInit();
+    } else {
+      authUser = null; updateAccountUI();
+      showAuthGate('login', first ? '' : 'You have been signed out.');
+    }
+    first = false;
+  });
+}
+
 (function init(){
   const start = (location.hash||'').replace('#','');
   secBoot();
@@ -3568,7 +3683,7 @@ setInterval(tickClock, 1000); tickClock();
   renderParkedButton();
   refreshInstallUI();
   if(pageTitles[start]) switchPage(start); else switchPage('dashboard');
-  cloudInit();
+  authBoot();
 })();
 
 if('serviceWorker' in navigator){
