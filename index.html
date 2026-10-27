@@ -1439,12 +1439,12 @@ function cloudInit(){
         cloudDocRef.set({ items, customers, sales, settings, reminders, parkedSales, expenses }, { merge:true });
       }
       cloudReady = true;
-    }).catch(e=>console.warn('Cloud initial load failed', e));
+    }).catch(e=>{ console.warn('Cloud initial load failed', e); cloudDenied(e); });
     cloudDocRef.onSnapshot(snap=>{
       if(!cloudReady) return; // skip the very first snapshot, already handled by the .get() above
       if(snap.metadata.hasPendingWrites) return; // this is our own write echoing back — ignore
       cloudApplyRemoteData(snap.data() || {});
-    }, e=>console.warn('Cloud listener error', e));
+    }, e=>{ console.warn('Cloud listener error', e); cloudDenied(e); });
   } catch(e){
     console.warn('Firebase init failed — app will keep working from local storage only.', e);
   }
@@ -3640,6 +3640,12 @@ function authErrText(e){
   if(c==='auth/operation-not-allowed') return 'This sign-in method is not turned on in Firebase yet.';
   return 'Could not sign in. ' + (c || 'Try again.');
 }
+function cloudDenied(e){
+  if(!(e && e.code==='permission-denied') || !authUser) return;
+  window.__authNotice = 'This Google account is not allowed to use this shop system. Sign in with the shop\'s own account.';
+  try{ localStorage.removeItem(SIGNED_KEY); }catch(_){}
+  firebase.auth().signOut();
+}
 function updateAccountUI(){
   const em = document.getElementById('acctEmail'); if(em) em.textContent = authUser ? authUser.email : 'Signed-in users only.';
   const b = document.getElementById('signOutBtn'); if(b) b.style.display = authUser ? 'inline-flex' : 'none';
@@ -3669,7 +3675,8 @@ function authBoot(){
       if(!cloudDocRef) cloudInit();
     } else {
       authUser = null; updateAccountUI();
-      showAuthGate('login', first ? '' : 'You have been signed out.');
+      if(window.__authNotice){ const n = window.__authNotice; window.__authNotice = null; showAuthGate('error', n); }
+      else showAuthGate('login', first ? '' : 'You have been signed out.');
     }
     first = false;
   });
