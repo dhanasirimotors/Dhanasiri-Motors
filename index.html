@@ -3642,9 +3642,11 @@ function authErrText(e){
 }
 function cloudDenied(e){
   if(!(e && e.code==='permission-denied') || !authUser) return;
-  window.__authNotice = 'This Google account is not allowed to use this shop system. Sign in with the shop\'s own account.';
+  /* start again from a clean page so the next sign-in is checked against the Rules from scratch */
+  try{ sessionStorage.setItem('dm_auth_notice', 'This Google account is not allowed to use this shop system. Sign in with the shop\'s own account.'); }catch(_){}
   try{ localStorage.removeItem(SIGNED_KEY); }catch(_){}
-  firebase.auth().signOut();
+  window.__reloading = true;
+  firebase.auth().signOut().finally(()=>location.reload());
 }
 function updateAccountUI(){
   const em = document.getElementById('acctEmail'); if(em) em.textContent = authUser ? authUser.email : 'Signed-in users only.';
@@ -3675,7 +3677,9 @@ function authBoot(){
       if(!cloudDocRef) cloudInit();
     } else {
       authUser = null; updateAccountUI();
-      if(window.__authNotice){ const n = window.__authNotice; window.__authNotice = null; showAuthGate('error', n); }
+      if(window.__reloading) return;
+      let n = ''; try{ n = sessionStorage.getItem('dm_auth_notice') || ''; sessionStorage.removeItem('dm_auth_notice'); }catch(_){}
+      if(n) showAuthGate('error', n);
       else showAuthGate('login', first ? '' : 'You have been signed out.');
     }
     first = false;
